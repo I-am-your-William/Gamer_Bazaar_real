@@ -75,11 +75,11 @@ export default function Footer() {
             <ul className="space-y-3 text-gray-400">
               {[
                 { href: '/verify', label: 'Product Verification' },
-                { href: '#', label: 'Warranty Claims' },
-                { href: '#', label: 'Customer Service' },
-                { href: '#', label: 'Return Policy' },
-                { href: '#', label: 'FAQ' },
-                { href: '#', label: 'Contact Us' },
+                { href: '/warranty', label: 'Warranty Claims' },
+                { href: '/support', label: 'Customer Service' },
+                { href: '/returns', label: 'Return Policy' },
+                { href: '/faq', label: 'FAQ' },
+                { href: '/contact', label: 'Contact Us' },
               ].map((item) => (
                 <li key={item.href}>
                   <Link href={item.href}>

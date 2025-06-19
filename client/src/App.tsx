@@ -12,6 +12,7 @@ import ProductDetail from "@/pages/product-detail";
 import Cart from "@/pages/cart";
 import Checkout from "@/pages/checkout";
 import Verify from "@/pages/verify";
+import QRScannerPage from "@/pages/qr-scanner";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminInventory from "@/pages/admin/inventory";
 import AdminOrders from "@/pages/admin/orders";
@@ -37,6 +38,7 @@ function Router() {
           <Route path="/cart" component={Cart} />
           <Route path="/checkout" component={Checkout} />
           <Route path="/verify/:code" component={Verify} />
+          <Route path="/qr-scanner" component={QRScannerPage} />
           <Route path="/admin" component={AdminDashboard} />
           <Route path="/admin/inventory" component={AdminInventory} />
           <Route path="/admin/orders" component={AdminOrders} />

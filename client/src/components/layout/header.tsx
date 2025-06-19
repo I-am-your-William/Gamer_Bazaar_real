@@ -13,12 +13,14 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
 import CartSidebar from '@/components/cart/cart-sidebar';
+import Sidebar from '@/components/layout/sidebar';
 import { Menu, Search, ShoppingCart, User, Heart } from 'lucide-react';
 
 export default function Header() {
   const [location, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [cartOpen, setCartOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, isAuthenticated } = useAuth();
 
   const { data: cartItems } = useQuery({
@@ -51,14 +53,19 @@ export default function Header() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/">
-              <div className="flex items-center space-x-2 cursor-pointer">
-                <div className="w-10 h-10 bg-gradient-to-r from-electric to-neon-green rounded-lg flex items-center justify-center">
+            <div className="flex items-center space-x-2">
+              <Link href="/">
+                <div className="w-10 h-10 bg-gradient-to-r from-electric to-neon-green rounded-lg flex items-center justify-center cursor-pointer">
                   <span className="text-deep-black font-bold text-xl">🎮</span>
                 </div>
-                <span className="font-orbitron font-bold text-xl neon-text">GAMERS BAZAAR</span>
-              </div>
-            </Link>
+              </Link>
+              <button 
+                onClick={() => setSidebarOpen(true)}
+                className="font-orbitron font-bold text-xl neon-text hover:text-electric transition-colors cursor-pointer"
+              >
+                GAMERS BAZAAR
+              </button>
+            </div>
             
             {/* Navigation - Desktop */}
             <nav className="hidden md:flex items-center space-x-8">
@@ -209,6 +216,9 @@ export default function Header() {
 
       {/* Cart Sidebar */}
       <CartSidebar open={cartOpen} onOpenChange={setCartOpen} />
+      
+      {/* Main Sidebar */}
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
     </>
   );
 }
