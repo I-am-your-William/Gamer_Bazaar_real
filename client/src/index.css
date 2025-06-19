@@ -1,0 +1,172 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap');
+
+:root {
+  --background: hsl(0, 0%, 4%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 6%, 10%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(195, 100%, 50%);
+  --primary-foreground: hsl(240, 10%, 3.9%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(195, 100%, 50%);
+  --radius: 0.5rem;
+  
+  /* Gaming specific colors */
+  --electric: hsl(195, 100%, 50%);
+  --neon-green: hsl(104, 100%, 54%);
+  --deep-black: hsl(0, 0%, 4%);
+  --charcoal: hsl(0, 0%, 10%);
+  --dark-gray: hsl(0, 0%, 16%);
+  --gaming-purple: hsl(268, 39%, 56%);
+  --gaming-orange: hsl(14, 100%, 60%);
+}
+
+.dark {
+  --background: hsl(0, 0%, 4%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 6%, 10%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(195, 100%, 50%);
+  --primary-foreground: hsl(240, 10%, 3.9%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(195, 100%, 50%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply antialiased bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .font-orbitron {
+    font-family: 'Orbitron', monospace;
+  }
+}
+
+@layer utilities {
+  .neon-text {
+    text-shadow: 0 0 10px hsl(var(--electric));
+  }
+  
+  .neon-glow {
+    box-shadow: 0 0 20px hsl(var(--electric) / 0.5);
+  }
+  
+  .neon-glow-green {
+    box-shadow: 0 0 20px hsl(var(--neon-green) / 0.5);
+  }
+  
+  .gaming-card {
+    background: linear-gradient(135deg, hsl(var(--charcoal)) 0%, hsl(var(--dark-gray)) 100%);
+    border: 1px solid hsl(var(--electric) / 0.3);
+    transition: all 0.3s ease;
+  }
+  
+  .gaming-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px hsl(var(--electric) / 0.3);
+  }
+  
+  .hero-gradient {
+    background: linear-gradient(135deg, hsl(var(--deep-black)) 0%, hsl(var(--charcoal)) 50%, hsl(var(--dark-gray)) 100%);
+  }
+  
+  .electric {
+    color: hsl(var(--electric));
+  }
+  
+  .neon-green {
+    color: hsl(var(--neon-green));
+  }
+  
+  .gaming-purple {
+    color: hsl(var(--gaming-purple));
+  }
+  
+  .gaming-orange {
+    color: hsl(var(--gaming-orange));
+  }
+  
+  .bg-electric {
+    background-color: hsl(var(--electric));
+  }
+  
+  .bg-neon-green {
+    background-color: hsl(var(--neon-green));
+  }
+  
+  .bg-gaming-purple {
+    background-color: hsl(var(--gaming-purple));
+  }
+  
+  .bg-gaming-orange {
+    background-color: hsl(var(--gaming-orange));
+  }
+  
+  .bg-deep-black {
+    background-color: hsl(var(--deep-black));
+  }
+  
+  .bg-charcoal {
+    background-color: hsl(var(--charcoal));
+  }
+  
+  .bg-dark-gray {
+    background-color: hsl(var(--dark-gray));
+  }
+  
+  .border-electric {
+    border-color: hsl(var(--electric));
+  }
+  
+  .border-neon-green {
+    border-color: hsl(var(--neon-green));
+  }
+}
+
+@keyframes glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px hsl(var(--electric) / 0.3); 
+  }
+  50% { 
+    box-shadow: 0 0 30px hsl(var(--electric) / 0.6); 
+  }
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s ease-in-out infinite;
+}
