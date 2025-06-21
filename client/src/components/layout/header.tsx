@@ -14,6 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
 import CartSidebar from '@/components/cart/cart-sidebar';
 import Sidebar from '@/components/layout/sidebar';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { Menu, Search, ShoppingCart, User, Heart } from 'lucide-react';
 
 export default function Header() {
@@ -107,6 +108,9 @@ export default function Header() {
             
             {/* User Actions */}
             <div className="flex items-center space-x-4">
+              {/* Theme Toggle */}
+              <ThemeToggle />
+              
               {/* Search - Mobile */}
               <div className="lg:hidden">
                 <Button variant="ghost" size="sm">

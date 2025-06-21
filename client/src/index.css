@@ -26,36 +26,63 @@
   --ring: hsl(195, 100%, 50%);
   --radius: 0.5rem;
   
-  /* Gaming specific colors */
-  --electric: hsl(195, 100%, 50%);
-  --neon-green: hsl(104, 100%, 54%);
-  --deep-black: hsl(0, 0%, 4%);
-  --charcoal: hsl(0, 0%, 10%);
-  --dark-gray: hsl(0, 0%, 16%);
-  --gaming-purple: hsl(268, 39%, 56%);
-  --gaming-orange: hsl(14, 100%, 60%);
+  /* Cyberpunk Gaming Colors */
+  --electric: hsl(142, 100%, 55%); /* #00FF88 */
+  --neon-green: hsl(104, 100%, 54%); /* #39FF14 */
+  --cyber-blue: hsl(191, 100%, 50%); /* #00D4FF */
+  --gaming-purple: hsl(268, 73%, 65%); /* #8B5CF6 */
+  --cyber-pink: hsl(323, 100%, 60%); /* #FF1E8C */
+  --cyber-yellow: hsl(51, 100%, 50%); /* #FFD700 */
+  --cyber-red: hsl(348, 100%, 60%); /* #FF3366 */
+  --deep-black: hsl(0, 0%, 4%); /* #0A0A0A */
+  --charcoal: hsl(0, 0%, 6%); /* #0F0F0F */
+  --dark-gray: hsl(0, 0%, 10%); /* #1A1A1A */
+  --medium-gray: hsl(0, 0%, 16%); /* #2A2A2A */
+  --light-gray: hsl(0, 0%, 22%); /* #3A3A3A */
+  
+  /* Light mode overrides */
+  --electric-light: hsl(142, 100%, 35%);
+  --neon-green-light: hsl(104, 100%, 34%);
+  --cyber-blue-light: hsl(191, 100%, 35%);
+  --gaming-purple-light: hsl(268, 73%, 45%);
 }
 
 .dark {
   --background: hsl(0, 0%, 4%);
   --foreground: hsl(0, 0%, 98%);
-  --muted: hsl(240, 3.7%, 15.9%);
-  --muted-foreground: hsl(240, 5%, 64.9%);
-  --popover: hsl(240, 10%, 3.9%);
+  --muted: hsl(0, 0%, 16%);
+  --muted-foreground: hsl(0, 0%, 64%);
+  --popover: hsl(0, 0%, 6%);
   --popover-foreground: hsl(0, 0%, 98%);
-  --card: hsl(240, 6%, 10%);
+  --card: hsl(0, 0%, 10%);
   --card-foreground: hsl(0, 0%, 98%);
-  --border: hsl(240, 3.7%, 15.9%);
-  --input: hsl(240, 3.7%, 15.9%);
-  --primary: hsl(195, 100%, 50%);
-  --primary-foreground: hsl(240, 10%, 3.9%);
-  --secondary: hsl(240, 3.7%, 15.9%);
+  --border: hsl(0, 0%, 16%);
+  --input: hsl(0, 0%, 16%);
+  --primary: hsl(142, 100%, 55%);
+  --primary-foreground: hsl(0, 0%, 4%);
+  --secondary: hsl(0, 0%, 16%);
   --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: hsl(240, 3.7%, 15.9%);
+  --accent: hsl(0, 0%, 16%);
   --accent-foreground: hsl(0, 0%, 98%);
-  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive: hsl(348, 100%, 60%);
   --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(195, 100%, 50%);
+  --ring: hsl(142, 100%, 55%);
+  
+  /* Cyberpunk specific overrides for dark mode */
+  --electric: hsl(142, 100%, 55%); /* #00FF88 */
+  --cyber-blue: hsl(191, 100%, 50%); /* #00D4FF */
+  --gaming-purple: hsl(268, 73%, 65%); /* #8B5CF6 */
+  --cyber-pink: hsl(323, 100%, 60%); /* #FF1E8C */
+}
+
+.light {
+  /* Light mode cyberpunk adjustments */
+  --primary: hsl(142, 100%, 35%);
+  --ring: hsl(142, 100%, 35%);
+  --electric: hsl(142, 100%, 35%);
+  --cyber-blue: hsl(191, 100%, 35%);
+  --gaming-purple: hsl(268, 73%, 45%);
+  --cyber-pink: hsl(323, 100%, 40%);
 }
 
 @layer base {
