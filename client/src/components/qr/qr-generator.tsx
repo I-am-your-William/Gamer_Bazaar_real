@@ -15,7 +15,12 @@ export default function QRGenerator({ qrCode, size = 200, showDetails = true }: 
   const { toast } = useToast();
   
   const verifyUrl = `${window.location.origin}/verify/${qrCode.code}`;
-  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(verifyUrl)}`;
+  
+  // Gaming-themed QR code with neon colors
+  const styledQrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(verifyUrl)}&color=00FF88&bgcolor=0A0A0A&margin=0&ecc=H`;
+  
+  // Standard QR code for downloading
+  const standardQrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(verifyUrl)}&format=png&ecc=M`;
 
   const copyToClipboard = async (text: string, label: string) => {
     try {
@@ -35,7 +40,7 @@ export default function QRGenerator({ qrCode, size = 200, showDetails = true }: 
 
   const downloadQR = () => {
     const link = document.createElement('a');
-    link.href = qrImageUrl;
+    link.href = standardQrImageUrl;
     link.download = `qr-${qrCode.serialNumber}.png`;
     document.body.appendChild(link);
     link.click();
@@ -56,7 +61,7 @@ export default function QRGenerator({ qrCode, size = 200, showDetails = true }: 
           
           <div className="inline-block p-4 bg-white rounded-xl mb-4">
             <img 
-              src={qrImageUrl}
+              src={styledQrImageUrl}
               alt={`QR Code for ${qrCode.product.name}`}
               className="w-full h-full object-contain"
               style={{ width: size, height: size }}
