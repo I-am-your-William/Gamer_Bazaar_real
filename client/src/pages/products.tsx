@@ -49,7 +49,8 @@ export default function Products() {
   };
 
   const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
+    const categoryValue = category === 'all' ? '' : category;
+    setSelectedCategory(categoryValue);
     setCurrentPage(1);
   };
 
@@ -109,7 +110,7 @@ export default function Products() {
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent className="bg-charcoal border-electric/20">
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
                   {categories?.map((category: any) => (
                     <SelectItem key={category.id} value={category.slug}>
                       {category.name}
