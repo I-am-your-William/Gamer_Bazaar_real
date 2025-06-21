@@ -361,13 +361,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/verify/:code', async (req, res) => {
+  // QR Code verification endpoint (supports both GET and POST)
+  const handleQRVerification = async (req: any, res: any) => {
     try {
       const code = req.params.code;
       const qrCode = await storage.getQrCode(code);
       
       if (!qrCode) {
-        return res.status(404).json({ message: "QR code not found" });
+        return res.status(404).json({ 
+          verified: false,
+          message: "QR code not found" 
+        });
       }
       
       // Mark as verified if not already
@@ -379,7 +383,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         
         // Send verification email
-        if (qrCode.user.email && !qrCode.emailSent) {
+        if (qrCode.user?.email && !qrCode.emailSent) {
           await emailService.sendVerificationConfirmation(
             qrCode.user.email,
             qrCode.product,
@@ -397,9 +401,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error verifying QR code:", error);
-      res.status(500).json({ message: "Failed to verify QR code" });
+      res.status(500).json({ 
+        verified: false,
+        message: "Failed to verify QR code" 
+      });
     }
-  });
+  };
+
+  app.get('/api/verify/:code', handleQRVerification);
+  app.post('/api/qr-verify/:code', handleQRVerification);
 
   // Admin analytics
   app.get('/api/analytics', isAuthenticated, async (req: any, res) => {

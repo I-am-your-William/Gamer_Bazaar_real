@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import jsQR from 'jsqr';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -80,18 +81,12 @@ export default function QRScanner({ onScan, className = '' }: QRScannerProps) {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
     try {
-      // Try to detect QR code using a simple pattern detection
-      // In a real implementation, you would use a QR code library like 'qr-scanner' or 'jsqr'
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height);
       
-      // Simplified QR detection (in production, use proper QR library)
-      // For demo purposes, we'll simulate QR detection
-      // You would typically use: import jsQR from 'jsqr'; const code = jsQR(imageData.data, imageData.width, imageData.height);
-      
-      // Simulated QR detection - in real app, replace with actual QR detection
-      if (Math.random() < 0.01) { // 1% chance to simulate detection
-        const mockQRCode = 'mock-qr-code-' + Date.now();
-        onScan(mockQRCode);
+      if (code) {
+        console.log('QR Code detected:', code.data);
+        onScan(code.data);
         stopScanning();
         return;
       }
