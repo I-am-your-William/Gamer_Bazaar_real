@@ -39,9 +39,9 @@ export default function Landing() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="font-orbitron font-black text-5xl lg:text-7xl mb-6 leading-tight">
-                LEVEL UP YOUR
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-electric to-neon-green ml-4">
-                  GAMING
+                Level up your gaming experience
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-electric to-neon-green block">
+                  in one click
                 </span>
               </h1>
               <p className="text-xl text-gray-300 mb-8 leading-relaxed">
