@@ -27,6 +27,7 @@ function Router() {
         <>
           <Route path="/" component={Landing} />
           <Route path="/verify/:code" component={Verify} />
+          <Route path="/qr-scanner" component={QRScannerPage} />
           <Route path="/products" component={Products} />
           <Route path="/products/:slug" component={ProductDetail} />
         </>
