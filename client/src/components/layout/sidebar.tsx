@@ -234,7 +234,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <div className="space-y-3">
             {!isAuthenticated ? (
               <Button 
-                onClick={() => window.location.href = '/api/login'}
+                onClick={() => {
+                  window.location.assign('/api/login');
+                }}
                 className="w-full bg-electric text-deep-black hover:bg-electric/80"
               >
                 Sign In

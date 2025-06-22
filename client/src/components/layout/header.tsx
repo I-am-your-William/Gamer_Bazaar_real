@@ -179,7 +179,9 @@ export default function Header() {
               ) : (
                 <Button 
                   className="bg-gradient-to-r from-electric to-neon-green text-deep-black px-4 py-2 rounded-full font-medium hover:shadow-lg transition-all duration-300"
-                  onClick={() => window.location.href = '/api/login'}
+                  onClick={() => {
+                    window.location.assign('/api/login');
+                  }}
                 >
                   Sign In
                 </Button>

@@ -122,6 +122,7 @@ export async function setupAuth(app: Express) {
     passport.authenticate(strategyName, {
       prompt: "login",
       scope: ["openid", "email", "profile", "offline_access"],
+      failureRedirect: "/?error=auth_failed",
     })(req, res, next);
   });
 
