@@ -34,20 +34,28 @@ export default function AdminLogin() {
 
   const adminLoginMutation = useMutation({
     mutationFn: async (data: AdminLoginData) => {
+      console.log('Attempting admin login with:', data);
+      
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
+        credentials: 'include',
       });
+      
+      console.log('Response status:', res.status);
       
       if (!res.ok) {
         const error = await res.json();
+        console.error('Login error:', error);
         throw new Error(error.message || 'Login failed');
       }
       
-      return await res.json();
+      const result = await res.json();
+      console.log('Login successful:', result);
+      return result;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });

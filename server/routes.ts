@@ -33,6 +33,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/login', async (req, res) => {
     try {
       const { username, password } = req.body;
+      console.log('Admin login attempt:', { username, password: password ? '[REDACTED]' : 'undefined' });
       
       // Simple admin authentication
       if (username === 'admin' && password === '1234') {
