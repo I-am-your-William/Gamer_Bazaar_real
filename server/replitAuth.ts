@@ -85,14 +85,19 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  for (const domain of process.env
-    .REPLIT_DOMAINS!.split(",")) {
+  const domains = process.env.REPLIT_DOMAINS!.split(",");
+  console.log("Registering auth strategies for domains:", domains);
+  
+  for (const domain of domains) {
+    const strategyName = `replitauth:${domain.trim()}`;
+    console.log(`Registering strategy: ${strategyName}`);
+    
     const strategy = new Strategy(
       {
-        name: `replitauth:${domain}`,
+        name: strategyName,
         config,
         scope: "openid email profile offline_access",
-        callbackURL: `https://${domain}/api/callback`,
+        callbackURL: `https://${domain.trim()}/api/callback`,
       },
       verify,
     );
@@ -105,6 +110,14 @@ export async function setupAuth(app: Express) {
   app.get("/api/login", (req, res, next) => {
     console.log(`Login attempt for hostname: ${req.hostname}`);
     const strategyName = `replitauth:${req.hostname}`;
+    console.log(`Using strategy: ${strategyName}`);
+    
+    // Verify strategy exists
+    const strategies = (passport as any)._strategies;
+    if (!strategies || !strategies[strategyName]) {
+      console.error(`Strategy ${strategyName} not found. Available strategies:`, Object.keys(strategies || {}));
+      return res.status(500).json({ message: "Authentication not configured for this domain" });
+    }
     
     passport.authenticate(strategyName, {
       prompt: "login",
