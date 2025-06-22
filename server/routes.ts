@@ -29,6 +29,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin login route
+  app.post('/api/admin/login', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      // Simple admin authentication
+      if (username === 'admin' && password === '1234') {
+        // Create or update admin session
+        const adminUser = await storage.upsertUser({
+          id: 'admin',
+          email: 'admin@example.com',
+          firstName: 'Admin',
+          lastName: 'User',
+          role: 'admin',
+        });
+
+        // Manually create session for admin
+        req.session.passport = { user: { 
+          claims: { sub: 'admin' },
+          access_token: 'admin-token',
+          expires_at: Math.floor(Date.now() / 1000) + 86400 // 24 hours
+        }};
+        
+        await new Promise((resolve, reject) => {
+          req.session.save((err: any) => {
+            if (err) reject(err);
+            else resolve(void 0);
+          });
+        });
+
+        res.json(adminUser);
+      } else {
+        res.status(401).json({ message: "Invalid admin credentials" });
+      }
+    } catch (error) {
+      console.error("Error during admin login:", error);
+      res.status(500).json({ message: "Failed to login as admin" });
+    }
+  });
+
   // Category routes
   app.get('/api/categories', async (req, res) => {
     try {

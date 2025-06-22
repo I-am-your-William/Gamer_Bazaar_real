@@ -18,6 +18,7 @@ import AdminDashboard from "@/pages/admin/dashboard";
 import AdminInventory from "@/pages/admin/inventory";
 import AdminOrders from "@/pages/admin/orders";
 import AdminQRManagement from "@/pages/admin/qr-management";
+import AdminLogin from "@/pages/admin-login";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -31,6 +32,7 @@ function Router() {
           <Route path="/qr-scanner" component={QRScannerPage} />
           <Route path="/products" component={Products} />
           <Route path="/products/:slug" component={ProductDetail} />
+          <Route path="/admin-login" component={AdminLogin} />
         </>
       ) : (
         <>
