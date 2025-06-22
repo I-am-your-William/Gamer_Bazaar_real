@@ -63,7 +63,8 @@ export default function AdminLogin() {
         title: "Admin Login Successful",
         description: "Welcome to the admin dashboard",
       });
-      setLocation('/admin');
+      // Force page reload to update authentication state
+      window.location.href = '/admin';
     },
     onError: (error: any) => {
       toast({

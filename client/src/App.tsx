@@ -47,6 +47,7 @@ function Router() {
           <Route path="/admin/inventory" component={AdminInventory} />
           <Route path="/admin/orders" component={AdminOrders} />
           <Route path="/admin/qr-management" component={AdminQRManagement} />
+          <Route path="/admin-login" component={AdminLogin} />
         </>
       )}
       <Route component={NotFound} />

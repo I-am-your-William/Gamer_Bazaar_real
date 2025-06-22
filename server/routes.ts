@@ -46,18 +46,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           role: 'admin',
         });
 
-        // Manually create session for admin
-        req.session.passport = { user: { 
+        // Manually create session for admin using req.login
+        req.login({ 
           claims: { sub: 'admin' },
           access_token: 'admin-token',
           expires_at: Math.floor(Date.now() / 1000) + 86400 // 24 hours
-        }};
-        
-        await new Promise((resolve, reject) => {
-          req.session.save((err: any) => {
-            if (err) reject(err);
-            else resolve(void 0);
-          });
+        }, (err) => {
+          if (err) {
+            console.error('Error during admin login:', err);
+            return res.status(500).json({ message: "Failed to create admin session" });
+          }
         });
 
         res.json(adminUser);
