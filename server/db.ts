@@ -17,9 +17,14 @@ if (!process.env.DATABASE_URL) {
 // Create pool with better error handling and connection settings
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
-  max: 1, // Reduce connection pool size for serverless
-  idleTimeoutMillis: 0,
-  connectionTimeoutMillis: 5000,
+  max: 3, // Increase pool size slightly
+  idleTimeoutMillis: 30000, // 30 seconds
+  connectionTimeoutMillis: 10000, // 10 seconds
+});
+
+// Add error handling for the pool
+pool.on('error', (err) => {
+  console.error('Database pool error:', err);
 });
 
 export const db = drizzle({ client: pool, schema });
