@@ -49,18 +49,20 @@ export default function Landing() {
                 Every product comes with a unique digital certificate for guaranteed authenticity.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
+                <Button 
+                  className="bg-gradient-to-r from-electric to-neon-green text-deep-black px-8 py-4 rounded-full font-bold text-lg hover:shadow-neon-glow transition-all duration-300 animate-glow"
+                  onClick={() => window.location.href = '/api/login'}
+                >
+                  SIGN IN WITH GOOGLE
+                </Button>
                 <Link href="/products">
-                  <Button className="bg-gradient-to-r from-electric to-neon-green text-deep-black px-8 py-4 rounded-full font-bold text-lg hover:shadow-neon-glow transition-all duration-300 animate-glow">
-                    SHOP NOW
+                  <Button 
+                    variant="outline" 
+                    className="border-2 border-electric text-electric px-8 py-4 rounded-full font-bold text-lg hover:bg-electric hover:text-deep-black transition-all duration-300"
+                  >
+                    BROWSE PRODUCTS
                   </Button>
                 </Link>
-                <Button 
-                  variant="outline" 
-                  className="border-2 border-electric text-electric px-8 py-4 rounded-full font-bold text-lg hover:bg-electric hover:text-deep-black transition-all duration-300"
-                  onClick={() => document.getElementById('qr-verification')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  VERIFY PRODUCT
-                </Button>
               </div>
             </div>
             
