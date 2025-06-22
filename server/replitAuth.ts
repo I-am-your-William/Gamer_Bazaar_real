@@ -104,7 +104,9 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/login", (req, res, next) => {
     console.log(`Login attempt for hostname: ${req.hostname}`);
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const strategyName = `replitauth:${req.hostname}`;
+    
+    passport.authenticate(strategyName, {
       prompt: "login",
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
@@ -112,10 +114,28 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/callback", (req, res, next) => {
     console.log(`Callback for hostname: ${req.hostname}`);
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      successReturnToOrRedirect: "/",
-      failureRedirect: "/api/login",
-      failureFlash: false,
+    const strategyName = `replitauth:${req.hostname}`;
+    
+    passport.authenticate(strategyName, (err, user, info) => {
+      if (err) {
+        console.error("Authentication callback error:", err);
+        return res.redirect("/?error=auth_failed");
+      }
+      
+      if (!user) {
+        console.log("Authentication failed:", info);
+        return res.redirect("/?error=auth_failed");
+      }
+      
+      req.logIn(user, (loginErr) => {
+        if (loginErr) {
+          console.error("Login error:", loginErr);
+          return res.redirect("/?error=login_failed");
+        }
+        
+        console.log("User successfully authenticated:", user.claims?.sub);
+        return res.redirect("/");
+      });
     })(req, res, next);
   });
 
@@ -134,7 +154,15 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
-  if (!req.isAuthenticated() || !user.expires_at) {
+  if (!req.isAuthenticated() || !user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  if (!user.claims || !user.expires_at) {
+    console.log("User missing claims or expires_at:", { 
+      hasClaims: !!user.claims, 
+      hasExpiresAt: !!user.expires_at 
+    });
     return res.status(401).json({ message: "Unauthorized" });
   }
 
@@ -145,6 +173,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
 
   const refreshToken = user.refresh_token;
   if (!refreshToken) {
+    console.log("No refresh token available for expired session");
     res.status(401).json({ message: "Unauthorized" });
     return;
   }
