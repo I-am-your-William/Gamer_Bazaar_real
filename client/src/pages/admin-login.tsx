@@ -12,6 +12,7 @@ import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useLocation } from 'wouter';
 import { Shield, ArrowLeft } from 'lucide-react';
 import { Link } from 'wouter';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 const adminLoginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
