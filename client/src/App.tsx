@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { useAuth } from "@/hooks/useAuth";
+import { AdminAuthProvider, useAdminAuth } from "@/hooks/useAdminAuth";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -22,10 +23,20 @@ import AdminLogin from "@/pages/admin-login";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
+  const { isAdminLoggedIn } = useAdminAuth();
 
   return (
     <Switch>
-      {isLoading || !isAuthenticated ? (
+      {/* Admin routes */}
+      {isAdminLoggedIn ? (
+        <>
+          <Route path="/admin" component={AdminDashboard} />
+          <Route path="/admin/inventory" component={AdminInventory} />
+          <Route path="/admin/orders" component={AdminOrders} />
+          <Route path="/admin/qr-management" component={AdminQRManagement} />
+          <Route path="*" component={() => <div>Redirecting...</div>} />
+        </>
+      ) : isLoading || !isAuthenticated ? (
         <>
           <Route path="/" component={Landing} />
           <Route path="/verify/:code" component={Verify} />
@@ -43,10 +54,6 @@ function Router() {
           <Route path="/checkout" component={Checkout} />
           <Route path="/verify/:code" component={Verify} />
           <Route path="/qr-scanner" component={QRScannerPage} />
-          <Route path="/admin" component={AdminDashboard} />
-          <Route path="/admin/inventory" component={AdminInventory} />
-          <Route path="/admin/orders" component={AdminOrders} />
-          <Route path="/admin/qr-management" component={AdminQRManagement} />
           <Route path="/admin-login" component={AdminLogin} />
         </>
       )}
@@ -57,14 +64,16 @@ function Router() {
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="gamer-bazaar-theme">
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="dark" storageKey="gamer-bazaar-theme">
         <TooltipProvider>
-          <Toaster />
-          <Router />
+          <AdminAuthProvider>
+            <Router />
+            <Toaster />
+          </AdminAuthProvider>
         </TooltipProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 

@@ -56,9 +56,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.error('Error during admin login:', err);
             return res.status(500).json({ message: "Failed to create admin session" });
           }
+          
+          // Send response after successful login
+          res.json(adminUser);
         });
-
-        res.json(adminUser);
       } else {
         res.status(401).json({ message: "Invalid admin credentials" });
       }

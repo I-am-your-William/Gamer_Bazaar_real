@@ -23,6 +23,7 @@ type AdminLoginData = z.infer<typeof adminLoginSchema>;
 export default function AdminLogin() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { adminLogin } = useAdminAuth();
   
   const form = useForm<AdminLoginData>({
     resolver: zodResolver(adminLoginSchema),
@@ -58,13 +59,12 @@ export default function AdminLogin() {
       return result;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      adminLogin();
       toast({
         title: "Admin Login Successful",
         description: "Welcome to the admin dashboard",
       });
-      // Force page reload to update authentication state
-      window.location.href = '/admin';
+      setLocation('/admin');
     },
     onError: (error: any) => {
       toast({
