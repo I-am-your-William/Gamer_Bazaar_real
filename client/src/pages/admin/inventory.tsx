@@ -67,6 +67,33 @@ export default function AdminInventory() {
     },
   });
 
+  const updateStockMutation = useMutation({
+    mutationFn: async ({ productId, change }: { productId: number; change: number }) => {
+      const product = products?.find((p: Product) => p.id === productId);
+      if (!product) throw new Error('Product not found');
+      
+      const newStock = Math.max(0, (product.stockQuantity || 0) + change);
+      await apiRequest(`/api/products/${productId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ stockQuantity: newStock }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      toast({
+        title: "Success",
+        description: "Stock updated successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update stock",
+        variant: "destructive",
+      });
+    },
+  });
+
   const filteredProducts = products?.filter((product: Product) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.category.toLowerCase().includes(searchTerm.toLowerCase())
@@ -148,23 +175,57 @@ export default function AdminInventory() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <p className="text-sm text-gray-400">Stock</p>
-                          <p className={`font-semibold ${
-                            product.stock > 10 ? 'text-neon-green' : 
-                            product.stock > 0 ? 'text-gaming-orange' : 'text-red-500'
-                          }`}>
-                            {product.stock} units
-                          </p>
+                      <div className="space-y-3 mb-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm text-gray-400">Current Stock</p>
+                            <p className={`font-semibold ${
+                              product.stockQuantity > 10 ? 'text-neon-green' : 
+                              product.stockQuantity > 0 ? 'text-gaming-orange' : 'text-red-500'
+                            }`}>
+                              {product.stockQuantity || 0} units
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-400">Status</p>
+                            <Badge className={
+                              product.stockQuantity > 0 ? 'bg-neon-green text-deep-black' : 'bg-red-500'
+                            }>
+                              {product.stockQuantity > 0 ? 'In Stock' : 'Out of Stock'}
+                            </Badge>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm text-gray-400">Status</p>
-                          <Badge className={
-                            product.stock > 0 ? 'bg-neon-green text-deep-black' : 'bg-red-500'
-                          }>
-                            {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
-                          </Badge>
+                        
+                        {/* Quick Stock Management */}
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="px-2 border-gaming-orange text-gaming-orange hover:bg-gaming-orange hover:text-white"
+                            onClick={() => updateStockMutation.mutate({ productId: product.id, change: -1 })}
+                            disabled={product.stockQuantity <= 0 || updateStockMutation.isPending}
+                          >
+                            -1
+                          </Button>
+                          <span className="text-xs text-gray-400 min-w-[40px] text-center">Stock</span>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="px-2 border-neon-green text-neon-green hover:bg-neon-green hover:text-deep-black"
+                            onClick={() => updateStockMutation.mutate({ productId: product.id, change: 1 })}
+                            disabled={updateStockMutation.isPending}
+                          >
+                            +1
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="px-2 border-electric text-electric hover:bg-electric hover:text-deep-black"
+                            onClick={() => updateStockMutation.mutate({ productId: product.id, change: 10 })}
+                            disabled={updateStockMutation.isPending}
+                          >
+                            +10
+                          </Button>
                         </div>
                       </div>
                       

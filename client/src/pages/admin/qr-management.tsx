@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import AdminSidebar from '@/components/admin/sidebar';
 import { QrCode, Search, Eye, Download } from 'lucide-react';
+import { queryClient, apiRequest } from '@/lib/queryClient';
 import type { QrCodeWithDetails } from '@/lib/types';
 
 export default function AdminQRManagement() {
@@ -42,6 +43,28 @@ export default function AdminQRManagement() {
   const { data: qrCodes, isLoading: qrLoading } = useQuery({
     queryKey: ['/api/qr-codes'],
     enabled: isAuthenticated && user?.role === 'admin',
+  });
+
+  const markAsVerifiedMutation = useMutation({
+    mutationFn: async (code: string) => {
+      await apiRequest(`/api/qr-codes/${code}/verify`, {
+        method: 'POST',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/qr-codes'] });
+      toast({
+        title: "Success",
+        description: "QR code marked as verified",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to verify QR code",
+        variant: "destructive",
+      });
+    },
   });
 
   const filteredQrCodes = qrCodes?.filter((qr: QrCodeWithDetails) =>
