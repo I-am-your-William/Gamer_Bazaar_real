@@ -38,7 +38,7 @@ export default function AdminLogin() {
     mutationFn: async (data: AdminLoginData) => {
       console.log('Attempting admin login with:', data);
       
-      const res = await fetch('/api/admin/login', {
+      const res = await fetch('/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -52,11 +52,17 @@ export default function AdminLogin() {
       if (!res.ok) {
         const error = await res.json();
         console.error('Login error:', error);
-        throw new Error(error.message || 'Login failed');
+        throw new Error(error.message || 'Invalid admin credentials');
       }
       
       const result = await res.json();
       console.log('Login successful:', result);
+      
+      // Verify admin role
+      if (result.role !== 'admin') {
+        throw new Error('Admin access required');
+      }
+      
       return result;
     },
     onSuccess: () => {
