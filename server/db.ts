@@ -10,8 +10,12 @@ neonConfig.useSecureWebSocket = true;
 neonConfig.pipelineConnect = false;
 
 console.log("DATABASE_URL loaded:", !!process.env.DATABASE_URL);
+console.log("DATABASE_URL value:", process.env.DATABASE_URL?.substring(0, 30) + "...");
 
 if (!process.env.DATABASE_URL) {
+  console.error("❌ DATABASE_URL not found!");
+  console.error("Make sure your .env file exists and contains:");
+  console.error("DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/gamer_bazaar");
   throw new Error(
     "DATABASE_URL must be set. Did you forget to provision a database?",
   );
