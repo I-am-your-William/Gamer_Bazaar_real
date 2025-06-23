@@ -118,6 +118,7 @@ export function setupLocalAuth(app: Express) {
   // Register route
   app.post("/api/register", async (req, res, next) => {
     try {
+      console.log('Registration attempt:', { ...req.body, password: '[REDACTED]' });
       const { username, email, password, firstName, lastName } = req.body;
       
       if (!username || !email || !password) {
