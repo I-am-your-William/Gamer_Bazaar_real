@@ -58,6 +58,13 @@ export default function AddInventory() {
         securityCodeImageUrl = uploadResult.url;
       }
 
+      console.log('Sending inventory unit data:', {
+        productId: data.productId,
+        serialNumber: data.serialNumber,
+        securityCodeImageUrl,
+        createdBy: 'admin',
+      });
+
       const res = await apiRequest('POST', '/api/inventory-units', {
         productId: data.productId,
         serialNumber: data.serialNumber,

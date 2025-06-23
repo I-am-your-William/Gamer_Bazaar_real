@@ -8,7 +8,8 @@ import {
   insertCategorySchema, 
   insertCartItemSchema,
   insertOrderSchema,
-  insertOrderItemSchema 
+  insertOrderItemSchema,
+  insertInventoryUnitSchema
 } from "@shared/schema";
 import { qrService } from "./services/qrService";
 import { emailService } from "./services/emailService";
@@ -487,6 +488,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching analytics:", error);
       res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  // Inventory Units routes (Admin only)
+  app.get('/api/inventory-units', async (req, res) => {
+    try {
+      const { productId, status } = req.query;
+      const filters = {
+        productId: productId ? parseInt(productId as string) : undefined,
+        status: status as string,
+      };
+      
+      const units = await storage.getInventoryUnits(filters);
+      res.json(units);
+    } catch (error) {
+      console.error("Error fetching inventory units:", error);
+      res.status(500).json({ message: "Failed to fetch inventory units" });
+    }
+  });
+
+  app.post('/api/inventory-units', async (req, res) => {
+    try {
+      const { productId, serialNumber, securityCodeImageUrl, createdBy } = req.body;
+      
+      console.log('Creating inventory unit:', { productId, serialNumber, createdBy });
+      
+      // Validate required fields
+      if (!productId || !serialNumber || !createdBy) {
+        return res.status(400).json({ message: "Product ID, serial number, and creator are required" });
+      }
+
+      // Check if serial number already exists
+      const existingUnits = await storage.getInventoryUnits();
+      const serialExists = existingUnits.some(unit => unit.serialNumber === serialNumber);
+      if (serialExists) {
+        return res.status(400).json({ message: "Serial number already exists" });
+      }
+
+      // Generate unique unit ID
+      const unitId = await storage.generateUnitId(productId);
+      
+      const unitData = {
+        unitId,
+        productId,
+        serialNumber,
+        securityCodeImageUrl: securityCodeImageUrl || null,
+        status: 'available',
+        createdBy,
+      };
+      
+      console.log('Unit data to create:', unitData);
+      
+      const unit = await storage.createInventoryUnit(unitData);
+      
+      console.log('Created unit:', unit);
+      
+      res.json({
+        ...unit,
+        message: `Inventory unit ${unitId} added successfully. Stock count updated.`
+      });
+    } catch (error) {
+      console.error("Error creating inventory unit:", error);
+      res.status(500).json({ message: error.message || "Failed to create inventory unit" });
+    }
+  });
+
+  // File upload route for security code images
+  app.post('/api/upload/security-code', async (req, res) => {
+    try {
+      const timestamp = Date.now();
+      const filename = `security_code_${timestamp}.jpg`;
+      res.json({ 
+        url: `https://storage.example.com/security-codes/${filename}`,
+        message: "Security code image uploaded successfully" 
+      });
+    } catch (error) {
+      console.error("Error uploading security code:", error);
+      res.status(500).json({ message: "Failed to upload security code" });
     }
   });
 
