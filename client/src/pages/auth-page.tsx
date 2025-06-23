@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLocalAuth } from '@/hooks/useLocalAuth';
-import { Navigate } from 'wouter';
+import { useLocation } from 'wouter';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -29,6 +29,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useLocalAuth();
   const [activeTab, setActiveTab] = useState('login');
+  const [, setLocation] = useLocation();
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -51,7 +52,8 @@ export default function AuthPage() {
 
   // Redirect if already logged in
   if (user) {
-    return <Navigate to="/" />;
+    setLocation('/');
+    return null;
   }
 
   const onLogin = (data: LoginFormData) => {

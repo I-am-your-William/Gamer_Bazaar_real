@@ -42,6 +42,7 @@ function Router() {
         <Route path="/admin/orders" component={AdminOrders} />
         <Route path="/admin/qr-management" component={AdminQRManagement} />
         <Route path="/admin-login" component={() => { window.location.href = '/admin'; return null; }} />
+        <Route path="/auth" component={AuthPage} />
         <Route component={NotFound} />
       </Switch>
     );
@@ -69,6 +70,7 @@ function Router() {
           <Route path="/verify/:code" component={Verify} />
           <Route path="/qr-scanner" component={QRScannerPage} />
           <Route path="/admin-login" component={AdminLogin} />
+          <Route path="/auth" component={AuthPage} />
           <Route component={NotFound} />
         </>
       )}
