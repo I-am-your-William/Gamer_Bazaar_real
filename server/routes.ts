@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupLocalAuth, isAuthenticated, isAdmin } from "./localAuth";
+import { setupLocalAuth, isAuthenticated, isAdmin, hashPassword } from "./localAuth";
 import { setupFileUpload } from "./fileUpload";
 import { z } from "zod";
 import { 

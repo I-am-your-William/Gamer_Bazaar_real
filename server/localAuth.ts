@@ -15,7 +15,7 @@ declare global {
 
 const scryptAsync = promisify(scrypt);
 
-async function hashPassword(password: string) {
+export async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
   const buf = (await scryptAsync(password, salt, 64)) as Buffer;
   return `${buf.toString("hex")}.${salt}`;
@@ -76,7 +76,10 @@ export function setupLocalAuth(app: Express) {
     )
   );
 
-  passport.serializeUser((user, done) => done(null, user.id));
+  passport.serializeUser((user, done) => {
+    console.log('Serializing user:', user);
+    done(null, user.id);
+  });
   
   passport.deserializeUser(async (id: string, done) => {
     try {
