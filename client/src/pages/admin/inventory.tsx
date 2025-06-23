@@ -1,13 +1,10 @@
-import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { Package, Plus, Minus, Home, LogOut } from 'lucide-react';
-import { queryClient, apiRequest } from '@/lib/queryClient';
+import { Package, Plus, Home, LogOut } from 'lucide-react';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import type { Product } from '@shared/schema';
 
@@ -26,9 +23,10 @@ export default function AdminInventory() {
     staleTime: 5 * 60 * 1000,
   });
 
-  console.log('Products data:', products);
-  console.log('Products loading:', productsLoading);
-  console.log('Products error:', error);
+  console.log('Inventory Debug - Products:', products);
+  console.log('Inventory Debug - Loading:', productsLoading);
+  console.log('Inventory Debug - Error:', error);
+  console.log('Inventory Debug - Products array length:', products?.products?.length);
 
   // Stock can only be managed through individual units now
 
