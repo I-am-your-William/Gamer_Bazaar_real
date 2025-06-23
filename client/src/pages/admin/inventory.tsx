@@ -40,6 +40,14 @@ export default function AdminInventory() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
+        <div className="text-red-400">Error loading products: {error.message}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
       <div className="container mx-auto px-4 py-8">
@@ -115,7 +123,14 @@ export default function AdminInventory() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {products?.products?.map((product) => (
+                {!products?.products || products.products.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-gray-400 py-8">
+                      No products found. Check console for debugging information.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  products.products.map((product) => (
                   <TableRow key={product.id} className="border-gray-700">
                     <TableCell className="text-white">
                       <div className="flex items-center gap-3">
@@ -168,7 +183,8 @@ export default function AdminInventory() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  ))
+                )}
               </TableBody>
             </Table>
           </CardContent>
