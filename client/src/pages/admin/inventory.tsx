@@ -25,38 +25,10 @@ export default function AdminInventory() {
     queryKey: ['/api/products'],
   });
 
-  const deleteProductMutation = useMutation({
-    mutationFn: async (productId: number) => {
-      await apiRequest(`/api/products/${productId}`, {
-        method: 'DELETE',
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
-      toast({
-        title: "Success",
-        description: "Product deleted successfully",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to delete product",
-        variant: "destructive",
-      });
-    },
-  });
-
   const updateStockMutation = useMutation({
-    mutationFn: async ({ productId, change }: { productId: number; change: number }) => {
-      const product = products?.find((p: Product) => p.id === productId);
-      if (!product) throw new Error('Product not found');
-      
-      const newStock = Math.max(0, (product.stockQuantity || 0) + change);
-      await apiRequest(`/api/products/${productId}`, {
-        method: 'PUT',
-        body: JSON.stringify({ stockQuantity: newStock }),
-      });
+    mutationFn: async ({ productId, stock_quantity }: { productId: number; stock_quantity: number }) => {
+      const res = await apiRequest("PATCH", `/api/products/${productId}`, { stock_quantity });
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
@@ -65,190 +37,160 @@ export default function AdminInventory() {
         description: "Stock updated successfully",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: "Failed to update stock",
+        description: error.message || "Failed to update stock",
         variant: "destructive",
       });
     },
   });
 
-  const filteredProducts = products?.filter((product: Product) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const handleStockUpdate = (productId: number) => {
+    const newStock = stockUpdates[productId];
+    if (newStock !== undefined && newStock >= 0) {
+      updateStockMutation.mutate({ productId, stock_quantity: newStock });
+      setStockUpdates(prev => ({ ...prev, [productId]: undefined }));
+    }
+  };
 
-  if (isLoading || !user) {
-    return (
-      <div className="min-h-screen bg-deep-black flex items-center justify-center">
-        <div className="animate-spin h-12 w-12 border-4 border-electric border-t-transparent rounded-full"></div>
-      </div>
-    );
-  }
+  const adjustStock = (productId: number, adjustment: number) => {
+    const product = products?.products?.find(p => p.id === productId);
+    if (product) {
+      const currentStock = stockUpdates[productId] !== undefined ? stockUpdates[productId] : product.stockQuantity;
+      const newStock = Math.max(0, currentStock + adjustment);
+      setStockUpdates(prev => ({ ...prev, [productId]: newStock }));
+    }
+  };
 
-  if (user.role !== 'admin') {
+  if (productsLoading) {
     return (
-      <div className="min-h-screen bg-deep-black flex items-center justify-center text-white">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">Access Denied</h1>
-          <p className="text-gray-400">Admin access required</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
+        <div className="text-white">Loading products...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-deep-black text-white">
-      <div className="flex">
-        <AdminSidebar />
-        
-        <main className="flex-1 p-8">
-          <div className="mb-8">
-            <h1 className="font-orbitron font-bold text-4xl mb-2">
-              INVENTORY <span className="text-electric">MANAGEMENT</span>
-            </h1>
-            <p className="text-gray-400">Manage your gaming equipment catalog</p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8 flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">Inventory Management</h1>
+            <p className="text-gray-400">Manage product stock levels</p>
           </div>
-
-          {/* Actions Bar */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search products..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-deep-black border-electric text-white"
-              />
-            </div>
-            <Button className="bg-electric text-deep-black hover:bg-electric/80">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Product
+          <div className="flex gap-4">
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.href = '/admin'}
+              className="text-white border-gray-600 hover:bg-gray-700"
+            >
+              <Package className="w-4 h-4 mr-2" />
+              Dashboard
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.href = '/'}
+              className="text-white border-gray-600 hover:bg-gray-700"
+            >
+              <Home className="w-4 h-4 mr-2" />
+              Homepage
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleLogout}
+              className="text-white border-gray-600 hover:bg-gray-700"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
             </Button>
           </div>
+        </div>
 
-          {/* Products Grid */}
-          <div className="grid gap-6">
-            {productsLoading ? (
-              <div className="flex justify-center py-12">
-                <div className="animate-spin h-12 w-12 border-4 border-electric border-t-transparent rounded-full"></div>
-              </div>
-            ) : filteredProducts.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProducts.map((product: Product) => (
-                  <Card key={product.id} className="gaming-card">
-                    <CardHeader className="pb-3">
-                      <div className="aspect-video bg-deep-black rounded-lg mb-3 overflow-hidden">
-                        <img
-                          src={product.imageUrl || '/placeholder-product.jpg'}
-                          alt={product.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <CardTitle className="text-lg">{product.name}</CardTitle>
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline" className="border-electric text-electric">
-                          {product.category}
-                        </Badge>
-                        <span className="font-bold text-neon-green">${product.price}</span>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3 mb-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm text-gray-400">Current Stock</p>
-                            <p className={`font-semibold ${
-                              product.stockQuantity > 10 ? 'text-neon-green' : 
-                              product.stockQuantity > 0 ? 'text-gaming-orange' : 'text-red-500'
-                            }`}>
-                              {product.stockQuantity || 0} units
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-400">Status</p>
-                            <Badge className={
-                              product.stockQuantity > 0 ? 'bg-neon-green text-deep-black' : 'bg-red-500'
-                            }>
-                              {product.stockQuantity > 0 ? 'In Stock' : 'Out of Stock'}
-                            </Badge>
-                          </div>
-                        </div>
-                        
-                        {/* Quick Stock Management */}
-                        <div className="flex items-center gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            className="px-2 border-gaming-orange text-gaming-orange hover:bg-gaming-orange hover:text-white"
-                            onClick={() => updateStockMutation.mutate({ productId: product.id, change: -1 })}
-                            disabled={product.stockQuantity <= 0 || updateStockMutation.isPending}
-                          >
-                            -1
-                          </Button>
-                          <span className="text-xs text-gray-400 min-w-[40px] text-center">Stock</span>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            className="px-2 border-neon-green text-neon-green hover:bg-neon-green hover:text-deep-black"
-                            onClick={() => updateStockMutation.mutate({ productId: product.id, change: 1 })}
-                            disabled={updateStockMutation.isPending}
-                          >
-                            +1
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            className="px-2 border-electric text-electric hover:bg-electric hover:text-deep-black"
-                            onClick={() => updateStockMutation.mutate({ productId: product.id, change: 10 })}
-                            disabled={updateStockMutation.isPending}
-                          >
-                            +10
-                          </Button>
+        <Card className="bg-gray-800/50 border-gray-700">
+          <CardHeader>
+            <CardTitle className="text-white">Product Inventory</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow className="border-gray-700">
+                  <TableHead className="text-gray-300">Product</TableHead>
+                  <TableHead className="text-gray-300">Price</TableHead>
+                  <TableHead className="text-gray-300">Status</TableHead>
+                  <TableHead className="text-gray-300">Current Stock</TableHead>
+                  <TableHead className="text-gray-300">Update Stock</TableHead>
+                  <TableHead className="text-gray-300">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {products?.products?.map((product) => (
+                  <TableRow key={product.id} className="border-gray-700">
+                    <TableCell className="text-white">
+                      <div className="flex items-center gap-3">
+                        {product.imageUrl && (
+                          <img
+                            src={product.imageUrl}
+                            alt={product.name}
+                            className="h-12 w-12 object-cover rounded"
+                          />
+                        )}
+                        <div>
+                          <div className="font-medium">{product.name}</div>
+                          <div className="text-sm text-gray-400">{product.brand}</div>
                         </div>
                       </div>
-                      
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="flex-1 border-electric text-electric hover:bg-electric hover:text-deep-black"
-                        >
-                          <Edit className="h-4 w-4 mr-1" />
-                          Edit
-                        </Button>
-                        <Button 
-                          variant="outline" 
+                    </TableCell>
+                    <TableCell className="text-white">${product.price}</TableCell>
+                    <TableCell>
+                      <Badge variant={product.stockQuantity > 0 ? "secondary" : "destructive"}>
+                        {product.stockQuantity > 0 ? "In Stock" : "Out of Stock"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-white">
+                      {stockUpdates[product.id] !== undefined ? stockUpdates[product.id] : product.stockQuantity}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
                           size="sm"
-                          className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
-                          onClick={() => deleteProductMutation.mutate(product.id)}
-                          disabled={deleteProductMutation.isPending}
+                          onClick={() => adjustStock(product.id, -1)}
+                          className="text-white border-gray-600 hover:bg-gray-700"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                        <Input
+                          type="number"
+                          value={stockUpdates[product.id] !== undefined ? stockUpdates[product.id] : product.stockQuantity}
+                          onChange={(e) => setStockUpdates(prev => ({ ...prev, [product.id]: parseInt(e.target.value) || 0 }))}
+                          className="w-20 bg-gray-800 border-gray-600 text-white"
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => adjustStock(product.id, 1)}
+                          className="text-white border-gray-600 hover:bg-gray-700"
+                        >
+                          <Plus className="h-4 w-4" />
                         </Button>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        onClick={() => handleStockUpdate(product.id)}
+                        disabled={updateStockMutation.isPending || stockUpdates[product.id] === undefined}
+                        className="bg-gaming-orange hover:bg-gaming-orange/80"
+                      >
+                        Update
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </div>
-            ) : (
-              <Card className="gaming-card">
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Package className="h-16 w-16 text-gray-600 mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">No Products Found</h3>
-                  <p className="text-gray-400 text-center mb-6">
-                    {searchTerm ? 'No products match your search criteria.' : 'Get started by adding your first product.'}
-                  </p>
-                  <Button className="bg-electric text-deep-black hover:bg-electric/80">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Your First Product
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </main>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
