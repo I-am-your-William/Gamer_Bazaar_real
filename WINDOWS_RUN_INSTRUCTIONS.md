@@ -11,12 +11,12 @@ start-windows.bat
 
 ## Option 2: Run directly with environment variable
 ```cmd
-set NODE_ENV=development && tsx server/index.ts
+set NODE_ENV=development && npx tsx server/index.ts
 ```
 
 ## Option 3: Use PowerShell
 ```powershell
-$env:NODE_ENV="development"; tsx server/index.ts
+$env:NODE_ENV="development"; npx tsx server/index.ts
 ```
 
 ## Option 4: Create .env file and run without NODE_ENV
@@ -30,7 +30,7 @@ PORT=5000
 
 2. Run:
 ```cmd
-tsx server/index.ts
+npx tsx server/index.ts
 ```
 
 ## Complete Setup Checklist
