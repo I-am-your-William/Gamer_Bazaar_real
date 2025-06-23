@@ -18,7 +18,7 @@ import type { Product } from '@shared/schema';
 const addInventorySchema = z.object({
   productId: z.number().min(1, 'Please select a product'),
   serialNumber: z.string().min(1, 'Serial number is required'),
-  securityCodeImage: z.string().optional(),
+  securityCodeImageUrl: z.string().optional(),
 });
 
 type AddInventoryFormData = z.infer<typeof addInventorySchema>;
@@ -38,7 +38,7 @@ export default function AddInventory() {
     defaultValues: {
       productId: 0,
       serialNumber: '',
-      securityCodeImage: '',
+      securityCodeImageUrl: '',
     },
   });
 
@@ -58,18 +58,19 @@ export default function AddInventory() {
         securityCodeImageUrl = uploadResult.url;
       }
 
-      const res = await apiRequest('POST', '/api/inventory-items', {
+      const res = await apiRequest('POST', '/api/inventory-units', {
         ...data,
-        securityCodeImage: securityCodeImageUrl,
+        securityCodeImageUrl,
+        createdBy: 'admin', // TODO: Get actual admin user ID
       });
       return res.json();
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/inventory-items'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/inventory-units'] });
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
       toast({
         title: "Success",
-        description: `Inventory item ${data.uuid} added successfully`,
+        description: data.message || `Inventory unit ${data.unitId} added successfully`,
       });
       form.reset();
       setImageFile(null);
@@ -114,7 +115,7 @@ export default function AddInventory() {
         <div className="mb-8 flex justify-between items-center">
           <div>
             <h1 className="text-4xl font-bold text-white mb-2">Add Inventory Item</h1>
-            <p className="text-gray-400">Stock in individual items with serial numbers and security codes</p>
+            <p className="text-gray-400">Add individual units with serial numbers and security codes to increase stock count</p>
           </div>
           <Button 
             variant="outline" 
@@ -130,7 +131,7 @@ export default function AddInventory() {
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Package className="w-5 h-5" />
-              Add New Inventory Item
+              Add Individual Unit to Inventory
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -220,7 +221,7 @@ export default function AddInventory() {
                   disabled={addInventoryMutation.isPending}
                   className="w-full bg-gaming-orange hover:bg-gaming-orange/80"
                 >
-                  {addInventoryMutation.isPending ? 'Adding...' : 'Add Inventory Item'}
+                  {addInventoryMutation.isPending ? 'Adding Unit...' : 'Add Unit to Inventory'}
                 </Button>
               </form>
             </Form>

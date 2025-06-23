@@ -77,7 +77,7 @@ export default function AdminInventory() {
         <div className="mb-8 flex justify-between items-center">
           <div>
             <h1 className="text-4xl font-bold text-white mb-2">Inventory Management</h1>
-            <p className="text-gray-400">Manage product stock levels</p>
+            <p className="text-gray-400">View product stock levels - Add individual units to increase stock count</p>
           </div>
           <div className="flex gap-4">
             <Button 
@@ -85,7 +85,15 @@ export default function AdminInventory() {
               className="bg-gaming-orange hover:bg-gaming-orange/80"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Add Item
+              Add Unit
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.href = '/admin/inventory-units'}
+              className="text-white border-gray-600 hover:bg-gray-700"
+            >
+              <Package className="w-4 h-4 mr-2" />
+              View All Units
             </Button>
             <Button 
               variant="outline" 

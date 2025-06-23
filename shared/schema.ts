@@ -69,16 +69,17 @@ export const products = pgTable("products", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Inventory Items - Individual units with serial numbers and security codes
-export const inventoryItems = pgTable("inventory_items", {
+// Individual Inventory Units - Each physical item tracked separately
+export const inventoryUnits = pgTable("inventory_units", {
   id: serial("id").primaryKey(),
-  uuid: varchar("uuid", { length: 100 }).notNull().unique(), // Auto-generated like HPO16_1
+  unitId: varchar("unit_id", { length: 100 }).notNull().unique(), // Auto-generated like HPOmen16_1
   productId: integer("product_id").references(() => products.id).notNull(),
-  serialNumber: varchar("serial_number", { length: 255 }).notNull(),
-  securityCodeImage: varchar("security_code_image"), // URL to security code image
+  serialNumber: varchar("serial_number", { length: 255 }).notNull().unique(),
+  securityCodeImageUrl: varchar("security_code_image_url"), // URL to uploaded security code image
   status: varchar("status", { length: 50 }).default("available"), // available, sold, reserved
   soldAt: timestamp("sold_at"),
   orderId: integer("order_id").references(() => orders.id),
+  createdBy: varchar("created_by").notNull(), // Admin who added this unit
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -202,13 +203,13 @@ export const qrCodesRelations = relations(qrCodes, ({ one }) => ({
   }),
 }));
 
-export const inventoryItemsRelations = relations(inventoryItems, ({ one }) => ({
+export const inventoryUnitsRelations = relations(inventoryUnits, ({ one }) => ({
   product: one(products, {
-    fields: [inventoryItems.productId],
+    fields: [inventoryUnits.productId],
     references: [products.id],
   }),
   order: one(orders, {
-    fields: [inventoryItems.orderId],
+    fields: [inventoryUnits.orderId],
     references: [orders.id],
   }),
 }));
@@ -246,7 +247,7 @@ export const insertQrCodeSchema = createInsertSchema(qrCodes).omit({
   createdAt: true,
 });
 
-export const insertInventoryItemSchema = createInsertSchema(inventoryItems).omit({
+export const insertInventoryUnitSchema = createInsertSchema(inventoryUnits).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -267,5 +268,5 @@ export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
 export type QrCode = typeof qrCodes.$inferSelect;
 export type InsertQrCode = z.infer<typeof insertQrCodeSchema>;
-export type InventoryItem = typeof inventoryItems.$inferSelect;
-export type InsertInventoryItem = z.infer<typeof insertInventoryItemSchema>;
+export type InventoryUnit = typeof inventoryUnits.$inferSelect;
+export type InsertInventoryUnit = z.infer<typeof insertInventoryUnitSchema>;

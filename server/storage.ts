@@ -6,7 +6,7 @@ import {
   orders,
   orderItems,
   qrCodes,
-  inventoryItems,
+  inventoryUnits,
   type User,
   type UpsertUser,
   type Category,
@@ -21,8 +21,8 @@ import {
   type InsertOrderItem,
   type QrCode,
   type InsertQrCode,
-  type InventoryItem,
-  type InsertInventoryItem,
+  type InventoryUnit,
+  type InsertInventoryUnit,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, ilike, sql } from "drizzle-orm";
@@ -79,12 +79,13 @@ export interface IStorage {
     totalProducts: number;
   }>;
 
-  // Inventory Items operations
-  getInventoryItems(filters?: { productId?: number; status?: string }): Promise<(InventoryItem & { product: Product })[]>;
-  getInventoryItem(uuid: string): Promise<(InventoryItem & { product: Product }) | undefined>;
-  createInventoryItem(item: InsertInventoryItem): Promise<InventoryItem>;
-  updateInventoryItemStatus(uuid: string, status: string, orderId?: number): Promise<InventoryItem>;
-  generateInventoryUUID(productId: number): Promise<string>;
+  // Inventory Units operations
+  getInventoryUnits(filters?: { productId?: number; status?: string }): Promise<(InventoryUnit & { product: Product })[]>;
+  getInventoryUnit(unitId: string): Promise<(InventoryUnit & { product: Product }) | undefined>;
+  createInventoryUnit(unit: InsertInventoryUnit): Promise<InventoryUnit>;
+  updateInventoryUnitStatus(unitId: string, status: string, orderId?: number): Promise<InventoryUnit>;
+  generateUnitId(productId: number): Promise<string>;
+  getAvailableInventoryCount(productId: number): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -491,53 +492,58 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  // Inventory Items operations
-  async getInventoryItems(filters: { productId?: number; status?: string } = {}): Promise<(InventoryItem & { product: Product })[]> {
+  // Inventory Units operations
+  async getInventoryUnits(filters: { productId?: number; status?: string } = {}): Promise<(InventoryUnit & { product: Product })[]> {
     const conditions = [];
     
     if (filters.productId) {
-      conditions.push(eq(inventoryItems.productId, filters.productId));
+      conditions.push(eq(inventoryUnits.productId, filters.productId));
     }
     
     if (filters.status) {
-      conditions.push(eq(inventoryItems.status, filters.status));
+      conditions.push(eq(inventoryUnits.status, filters.status));
     }
 
     return await db
       .select()
-      .from(inventoryItems)
-      .leftJoin(products, eq(inventoryItems.productId, products.id))
+      .from(inventoryUnits)
+      .leftJoin(products, eq(inventoryUnits.productId, products.id))
       .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(inventoryItems.createdAt)
+      .orderBy(inventoryUnits.createdAt)
       .then(results => 
-        results.map(({ inventory_items, products }) => ({
-          ...inventory_items,
+        results.map(({ inventory_units, products }) => ({
+          ...inventory_units,
           product: products!,
         }))
       );
   }
 
-  async getInventoryItem(uuid: string): Promise<(InventoryItem & { product: Product }) | undefined> {
+  async getInventoryUnit(unitId: string): Promise<(InventoryUnit & { product: Product }) | undefined> {
     const [result] = await db
       .select()
-      .from(inventoryItems)
-      .leftJoin(products, eq(inventoryItems.productId, products.id))
-      .where(eq(inventoryItems.uuid, uuid));
+      .from(inventoryUnits)
+      .leftJoin(products, eq(inventoryUnits.productId, products.id))
+      .where(eq(inventoryUnits.unitId, unitId));
 
     if (!result) return undefined;
 
     return {
-      ...result.inventory_items,
+      ...result.inventory_units,
       product: result.products!,
     };
   }
 
-  async createInventoryItem(item: InsertInventoryItem): Promise<InventoryItem> {
-    const [newItem] = await db.insert(inventoryItems).values(item).returning();
-    return newItem;
+  async createInventoryUnit(unit: InsertInventoryUnit): Promise<InventoryUnit> {
+    const [newUnit] = await db.insert(inventoryUnits).values(unit).returning();
+    
+    // Update product stock quantity by counting available units
+    const availableCount = await this.getAvailableInventoryCount(unit.productId);
+    await this.updateProduct(unit.productId, { stockQuantity: availableCount });
+    
+    return newUnit;
   }
 
-  async updateInventoryItemStatus(uuid: string, status: string, orderId?: number): Promise<InventoryItem> {
+  async updateInventoryUnitStatus(unitId: string, status: string, orderId?: number): Promise<InventoryUnit> {
     const updateData: any = { 
       status, 
       updatedAt: new Date() 
@@ -548,35 +554,52 @@ export class DatabaseStorage implements IStorage {
       updateData.orderId = orderId;
     }
 
-    const [updatedItem] = await db
-      .update(inventoryItems)
+    const [updatedUnit] = await db
+      .update(inventoryUnits)
       .set(updateData)
-      .where(eq(inventoryItems.uuid, uuid))
+      .where(eq(inventoryUnits.unitId, unitId))
       .returning();
     
-    return updatedItem;
+    // Update product stock quantity after status change
+    const availableCount = await this.getAvailableInventoryCount(updatedUnit.productId);
+    await this.updateProduct(updatedUnit.productId, { stockQuantity: availableCount });
+    
+    return updatedUnit;
   }
 
-  async generateInventoryUUID(productId: number): Promise<string> {
+  async generateUnitId(productId: number): Promise<string> {
     const product = await this.getProduct(productId);
     if (!product) throw new Error('Product not found');
 
-    // Generate UUID based on product SKU or name
+    // Use product SKU as base, or generate from name
     let prefix = product.sku || '';
     if (!prefix) {
-      // Generate from product name if no SKU
       const words = product.name.split(' ');
       prefix = words.slice(0, 2).map(w => w.substring(0, 3)).join('').toUpperCase();
     }
 
-    // Get count of existing items for this product
+    // Get count of existing units for this product to generate next number
     const [countResult] = await db
       .select({ count: sql<number>`COUNT(*)` })
-      .from(inventoryItems)
-      .where(eq(inventoryItems.productId, productId));
+      .from(inventoryUnits)
+      .where(eq(inventoryUnits.productId, productId));
 
     const count = (countResult?.count || 0) + 1;
     return `${prefix}_${count}`;
+  }
+
+  async getAvailableInventoryCount(productId: number): Promise<number> {
+    const [countResult] = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(inventoryUnits)
+      .where(
+        and(
+          eq(inventoryUnits.productId, productId),
+          eq(inventoryUnits.status, 'available')
+        )
+      );
+
+    return countResult?.count || 0;
   }
 }
 
