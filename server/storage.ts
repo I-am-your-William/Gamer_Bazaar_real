@@ -24,7 +24,9 @@ import {
   type InventoryUnit,
   type InsertInventoryUnit,
 } from "@shared/schema";
-import { db } from "./db";
+// Use local PostgreSQL driver for local development
+const isLocalPostgres = process.env.DATABASE_URL?.includes('localhost') || process.env.DATABASE_URL?.includes('127.0.0.1');
+const { db } = isLocalPostgres ? await import('./db-local') : await import('./db');
 import { eq, desc, and, ilike, sql } from "drizzle-orm";
 
 export interface IStorage {
