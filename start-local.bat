@@ -1,7 +1,13 @@
 @echo off
-echo Fixing database configuration for local PostgreSQL...
-node fix-database.js
+echo ==========================================
+echo  Gaming Equipment E-Commerce Application
+echo ==========================================
 echo.
-echo Starting server with local PostgreSQL support...
+echo Starting local PostgreSQL server...
+echo Make sure your .env file has the correct database password
+echo.
+echo Server will start at: http://localhost:5000
+echo Admin login: username=admin, password=1234
+echo.
 npx tsx server/index.ts
 pause
