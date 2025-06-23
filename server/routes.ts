@@ -192,7 +192,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = parseInt(req.params.id);
       const updates = req.body;
       
+      console.log('Stock update request:', { id, updates });
+      
+      // Map stockQuantity to stock_quantity for database
+      if (updates.stockQuantity !== undefined) {
+        updates.stock_quantity = updates.stockQuantity;
+        delete updates.stockQuantity;
+      }
+      
       const product = await storage.updateProduct(id, updates);
+      console.log('Updated product:', product);
       res.json(product);
     } catch (error) {
       console.error("Error updating product:", error);

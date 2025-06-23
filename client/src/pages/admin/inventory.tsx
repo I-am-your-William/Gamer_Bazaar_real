@@ -26,8 +26,8 @@ export default function AdminInventory() {
   });
 
   const updateStockMutation = useMutation({
-    mutationFn: async ({ productId, stock_quantity }: { productId: number; stock_quantity: number }) => {
-      const res = await apiRequest("PATCH", `/api/products/${productId}`, { stock_quantity });
+    mutationFn: async ({ productId, stockQuantity }: { productId: number; stockQuantity: number }) => {
+      const res = await apiRequest("PATCH", `/api/products/${productId}`, { stockQuantity });
       return res.json();
     },
     onSuccess: () => {
@@ -49,7 +49,7 @@ export default function AdminInventory() {
   const handleStockUpdate = (productId: number) => {
     const newStock = stockUpdates[productId];
     if (newStock !== undefined && newStock >= 0) {
-      updateStockMutation.mutate({ productId, stock_quantity: newStock });
+      updateStockMutation.mutate({ productId, stockQuantity: newStock });
       setStockUpdates(prev => ({ ...prev, [productId]: undefined }));
     }
   };
