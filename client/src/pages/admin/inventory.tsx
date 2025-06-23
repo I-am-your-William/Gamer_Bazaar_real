@@ -4,45 +4,25 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/hooks/useAuth';
-import { useEffect } from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import AdminSidebar from '@/components/admin/sidebar';
-import { Package, Plus, Search, Edit, Trash2 } from 'lucide-react';
+import { Package, Plus, Minus, Home, LogOut } from 'lucide-react';
 import { queryClient, apiRequest } from '@/lib/queryClient';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
 import type { Product } from '@shared/schema';
 
 export default function AdminInventory() {
   const { toast } = useToast();
-  const { isAuthenticated, isLoading, user } = useAuth();
-  const [searchTerm, setSearchTerm] = useState('');
+  const { adminLogout } = useAdminAuth();
+  const [stockUpdates, setStockUpdates] = useState<{ [key: number]: number }>({});
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
+  const handleLogout = () => {
+    adminLogout();
+    window.location.href = '/';
+  };
 
-    if (!isLoading && user?.role !== 'admin') {
-      toast({
-        title: "Access Denied",
-        description: "Admin access required.",
-        variant: "destructive",
-      });
-      return;
-    }
-  }, [isAuthenticated, isLoading, user, toast]);
-
-  const { data: products, isLoading: productsLoading } = useQuery({
+  const { data: products, isLoading: productsLoading } = useQuery<{ products: Product[]; total: number }>({
     queryKey: ['/api/products'],
-    enabled: isAuthenticated && user?.role === 'admin',
   });
 
   const deleteProductMutation = useMutation({

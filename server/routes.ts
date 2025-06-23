@@ -186,6 +186,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update product stock (admin only)
+  app.patch('/api/products/:id', async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      
+      const product = await storage.updateProduct(id, updates);
+      res.json(product);
+    } catch (error) {
+      console.error("Error updating product:", error);
+      res.status(500).json({ message: "Failed to update product" });
+    }
+  });
+
   // Cart routes
   app.get('/api/cart', isAuthenticated, async (req: any, res) => {
     try {
