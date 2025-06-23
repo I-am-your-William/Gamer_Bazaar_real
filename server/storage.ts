@@ -159,7 +159,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(products)
       .where(and(...conditions))
-      .orderBy(desc(products.createdAt))
+      .orderBy(products.id)
       .limit(limit)
       .offset(offset);
 
