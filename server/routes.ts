@@ -1,7 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupLocalAuth, isAuthenticated, isAdmin } from "./localAuth";
+import { setupFileUpload } from "./fileUpload";
 import { z } from "zod";
 import { 
   insertProductSchema, 
@@ -15,20 +16,11 @@ import { qrService } from "./services/qrService";
 import { emailService } from "./services/emailService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // Setup local authentication and file uploads
+  setupLocalAuth(app);
+  setupFileUpload(app);
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  // Auth routes are handled by setupLocalAuth
 
   // Admin login route
   app.post('/api/admin/login', async (req, res) => {
@@ -554,20 +546,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // File upload route for security code images
-  app.post('/api/upload/security-code', async (req, res) => {
-    try {
-      const timestamp = Date.now();
-      const filename = `security_code_${timestamp}.jpg`;
-      res.json({ 
-        url: `https://storage.example.com/security-codes/${filename}`,
-        message: "Security code image uploaded successfully" 
-      });
-    } catch (error) {
-      console.error("Error uploading security code:", error);
-      res.status(500).json({ message: "Failed to upload security code" });
-    }
-  });
+  // File upload is handled by setupFileUpload() middleware
 
   const httpServer = createServer(app);
   return httpServer;

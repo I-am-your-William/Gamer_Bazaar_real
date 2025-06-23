@@ -22,6 +22,7 @@ import InventoryUnits from "@/pages/admin/inventory-units";
 import AdminOrders from "@/pages/admin/orders";
 import AdminQRManagement from "@/pages/admin/qr-management";
 import AdminLogin from "@/pages/admin-login";
+import AuthPage from "@/pages/auth-page";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
