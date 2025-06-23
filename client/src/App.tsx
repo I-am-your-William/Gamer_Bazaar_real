@@ -58,6 +58,7 @@ function Router() {
           <Route path="/products" component={Products} />
           <Route path="/products/:slug" component={ProductDetail} />
           <Route path="/admin-login" component={AdminLogin} />
+          <Route path="/auth" component={AuthPage} />
           <Route component={NotFound} />
         </>
       ) : (
