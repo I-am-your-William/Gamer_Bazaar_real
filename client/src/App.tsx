@@ -24,19 +24,26 @@ import AdminLogin from "@/pages/admin-login";
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
   const { isAdminLoggedIn } = useAdminAuth();
+  
+  console.log('Router state:', { isAuthenticated, isLoading, isAdminLoggedIn });
+
+  // Admin routes take priority
+  if (isAdminLoggedIn) {
+    return (
+      <Switch>
+        <Route path="/admin" component={AdminDashboard} />
+        <Route path="/admin/inventory" component={AdminInventory} />
+        <Route path="/admin/orders" component={AdminOrders} />
+        <Route path="/admin/qr-management" component={AdminQRManagement} />
+        <Route path="/admin-login" component={() => { window.location.href = '/admin'; return null; }} />
+        <Route component={NotFound} />
+      </Switch>
+    );
+  }
 
   return (
     <Switch>
-      {/* Admin routes */}
-      {isAdminLoggedIn ? (
-        <>
-          <Route path="/admin" component={AdminDashboard} />
-          <Route path="/admin/inventory" component={AdminInventory} />
-          <Route path="/admin/orders" component={AdminOrders} />
-          <Route path="/admin/qr-management" component={AdminQRManagement} />
-          <Route path="*" component={() => <div>Redirecting...</div>} />
-        </>
-      ) : isLoading || !isAuthenticated ? (
+      {isLoading || !isAuthenticated ? (
         <>
           <Route path="/" component={Landing} />
           <Route path="/verify/:code" component={Verify} />
@@ -44,6 +51,7 @@ function Router() {
           <Route path="/products" component={Products} />
           <Route path="/products/:slug" component={ProductDetail} />
           <Route path="/admin-login" component={AdminLogin} />
+          <Route component={NotFound} />
         </>
       ) : (
         <>
@@ -55,9 +63,9 @@ function Router() {
           <Route path="/verify/:code" component={Verify} />
           <Route path="/qr-scanner" component={QRScannerPage} />
           <Route path="/admin-login" component={AdminLogin} />
+          <Route component={NotFound} />
         </>
       )}
-      <Route component={NotFound} />
     </Switch>
   );
 }

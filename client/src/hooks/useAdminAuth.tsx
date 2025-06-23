@@ -14,10 +14,12 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Check if admin is logged in from localStorage
     const adminStatus = localStorage.getItem('admin_logged_in');
+    console.log('Admin auth status from localStorage:', adminStatus);
     setIsAdminLoggedIn(adminStatus === 'true');
   }, []);
 
   const adminLogin = () => {
+    console.log('Admin logging in...');
     localStorage.setItem('admin_logged_in', 'true');
     setIsAdminLoggedIn(true);
   };
