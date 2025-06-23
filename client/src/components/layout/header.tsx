@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { useAuth } from '@/hooks/useAuth';
+import { useLocalAuth } from '@/hooks/useLocalAuth';
 import { useQuery } from '@tanstack/react-query';
 import CartSidebar from '@/components/cart/cart-sidebar';
 import Sidebar from '@/components/layout/sidebar';
@@ -22,7 +22,8 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [cartOpen, setCartOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, isAuthenticated } = useAuth();
+  const { user, logoutMutation } = useLocalAuth();
+  const isAuthenticated = !!user;
 
   const { data: cartItems } = useQuery({
     queryKey: ['/api/cart'],
@@ -180,7 +181,7 @@ export default function Header() {
                 <Button 
                   className="bg-gradient-to-r from-electric to-neon-green text-deep-black px-4 py-2 rounded-full font-medium hover:shadow-lg transition-all duration-300"
                   onClick={() => {
-                    window.location.assign('/api/login');
+                    window.location.assign('/auth');
                   }}
                 >
                   Sign In

@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme/theme-provider";
-import { useAuth } from "@/hooks/useAuth";
+import { useLocalAuth, LocalAuthProvider } from "@/hooks/useLocalAuth";
 import { AdminAuthProvider, useAdminAuth } from "@/hooks/useAdminAuth";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
@@ -25,7 +25,8 @@ import AdminLogin from "@/pages/admin-login";
 import AuthPage from "@/pages/auth-page";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useLocalAuth();
+  const isAuthenticated = !!user;
   const { isAdminLoggedIn } = useAdminAuth();
   
   console.log('Router state:', { isAuthenticated, isLoading, isAdminLoggedIn });
@@ -80,10 +81,12 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="gamer-bazaar-theme">
         <TooltipProvider>
-          <AdminAuthProvider>
-            <Router />
-            <Toaster />
-          </AdminAuthProvider>
+          <LocalAuthProvider>
+            <AdminAuthProvider>
+              <Router />
+              <Toaster />
+            </AdminAuthProvider>
+          </LocalAuthProvider>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
