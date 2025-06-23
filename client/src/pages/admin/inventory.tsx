@@ -21,9 +21,14 @@ export default function AdminInventory() {
     window.location.href = '/';
   };
 
-  const { data: products, isLoading: productsLoading } = useQuery<{ products: Product[]; total: number }>({
+  const { data: products, isLoading: productsLoading, error } = useQuery<{ products: Product[]; total: number }>({
     queryKey: ['/api/products'],
+    staleTime: 5 * 60 * 1000,
   });
+
+  console.log('Products data:', products);
+  console.log('Products loading:', productsLoading);
+  console.log('Products error:', error);
 
   // Stock can only be managed through individual units now
 
