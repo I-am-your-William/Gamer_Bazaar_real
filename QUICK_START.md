@@ -32,6 +32,12 @@ npm run db:push
 ```
 
 ### 5. Start Application
+**For Windows:**
+```bash
+npm run dev:win
+```
+
+**For Mac/Linux:**
 ```bash
 npm run dev
 ```

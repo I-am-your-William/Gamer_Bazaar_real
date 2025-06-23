@@ -72,6 +72,13 @@ mkdir uploads
 Or create it manually in your project folder.
 
 ### Step 6: Start Development Server
+
+**For Windows:**
+```bash
+npm run dev:win
+```
+
+**For Mac/Linux (or if you have cross-env installed):**
 ```bash
 npm run dev
 ```
