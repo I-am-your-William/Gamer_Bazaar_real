@@ -4,10 +4,11 @@
 The package.json in your local copy doesn't have the Windows script. Here are your options:
 
 ## Option 1: Use the batch file (Easiest)
-I've created `start-windows.bat`. Just double-click it or run:
+I've created `start-with-env.bat`. Just double-click it or run:
 ```cmd
-start-windows.bat
+start-with-env.bat
 ```
+This will test your environment variables first, then start the server.
 
 ## Option 2: Run directly with environment variable
 ```cmd
