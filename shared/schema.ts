@@ -246,6 +246,12 @@ export const insertQrCodeSchema = createInsertSchema(qrCodes).omit({
   createdAt: true,
 });
 
+export const insertInventoryItemSchema = createInsertSchema(inventoryItems).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;

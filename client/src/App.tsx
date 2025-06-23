@@ -17,6 +17,7 @@ import Verify from "@/pages/verify";
 import QRScannerPage from "@/pages/qr-scanner";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminInventory from "@/pages/admin/inventory";
+import AddInventory from "@/pages/admin/add-inventory";
 import AdminOrders from "@/pages/admin/orders";
 import AdminQRManagement from "@/pages/admin/qr-management";
 import AdminLogin from "@/pages/admin-login";

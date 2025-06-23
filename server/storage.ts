@@ -490,6 +490,94 @@ export class DatabaseStorage implements IStorage {
       totalProducts: Number(totalProductsResult.count) || 0,
     };
   }
+
+  // Inventory Items operations
+  async getInventoryItems(filters: { productId?: number; status?: string } = {}): Promise<(InventoryItem & { product: Product })[]> {
+    const conditions = [];
+    
+    if (filters.productId) {
+      conditions.push(eq(inventoryItems.productId, filters.productId));
+    }
+    
+    if (filters.status) {
+      conditions.push(eq(inventoryItems.status, filters.status));
+    }
+
+    return await db
+      .select()
+      .from(inventoryItems)
+      .leftJoin(products, eq(inventoryItems.productId, products.id))
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(inventoryItems.createdAt)
+      .then(results => 
+        results.map(({ inventory_items, products }) => ({
+          ...inventory_items,
+          product: products!,
+        }))
+      );
+  }
+
+  async getInventoryItem(uuid: string): Promise<(InventoryItem & { product: Product }) | undefined> {
+    const [result] = await db
+      .select()
+      .from(inventoryItems)
+      .leftJoin(products, eq(inventoryItems.productId, products.id))
+      .where(eq(inventoryItems.uuid, uuid));
+
+    if (!result) return undefined;
+
+    return {
+      ...result.inventory_items,
+      product: result.products!,
+    };
+  }
+
+  async createInventoryItem(item: InsertInventoryItem): Promise<InventoryItem> {
+    const [newItem] = await db.insert(inventoryItems).values(item).returning();
+    return newItem;
+  }
+
+  async updateInventoryItemStatus(uuid: string, status: string, orderId?: number): Promise<InventoryItem> {
+    const updateData: any = { 
+      status, 
+      updatedAt: new Date() 
+    };
+    
+    if (status === 'sold' && orderId) {
+      updateData.soldAt = new Date();
+      updateData.orderId = orderId;
+    }
+
+    const [updatedItem] = await db
+      .update(inventoryItems)
+      .set(updateData)
+      .where(eq(inventoryItems.uuid, uuid))
+      .returning();
+    
+    return updatedItem;
+  }
+
+  async generateInventoryUUID(productId: number): Promise<string> {
+    const product = await this.getProduct(productId);
+    if (!product) throw new Error('Product not found');
+
+    // Generate UUID based on product SKU or name
+    let prefix = product.sku || '';
+    if (!prefix) {
+      // Generate from product name if no SKU
+      const words = product.name.split(' ');
+      prefix = words.slice(0, 2).map(w => w.substring(0, 3)).join('').toUpperCase();
+    }
+
+    // Get count of existing items for this product
+    const [countResult] = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(inventoryItems)
+      .where(eq(inventoryItems.productId, productId));
+
+    const count = (countResult?.count || 0) + 1;
+    return `${prefix}_${count}`;
+  }
 }
 
 export const storage = new DatabaseStorage();
