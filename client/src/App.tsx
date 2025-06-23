@@ -28,6 +28,15 @@ function Router() {
   const { user, isLoading } = useLocalAuth();
   const isAuthenticated = !!user;
   const { isAdminLoggedIn } = useAdminAuth();
+
+  // Add loading spinner for better UX
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-deep-black">
+        <div className="text-electric text-xl">Loading...</div>
+      </div>
+    );
+  }
   
   console.log('Router state:', { isAuthenticated, isLoading, isAdminLoggedIn });
 

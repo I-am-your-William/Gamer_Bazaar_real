@@ -12,16 +12,19 @@ import { Badge } from '@/components/ui/badge';
 export default function Landing() {
   const [verificationCode, setVerificationCode] = useState('');
 
-  const { data: productsData } = useQuery({
+  const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ['/api/products', { limit: 8 }],
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const { data: categories } = useQuery({
+  const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ['/api/categories'],
+    staleTime: 10 * 60 * 1000, // 10 minutes
   });
 
   const featuredProducts = productsData?.products || [];
   const productCategories = categories || [];
+  const isLoading = productsLoading || categoriesLoading;
 
   return (
     <div className="min-h-screen bg-deep-black text-white">
@@ -89,7 +92,16 @@ export default function Landing() {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {productCategories.slice(0, 3).map((category: any) => (
+            {isLoading ? (
+              [...Array(3)].map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="bg-gray-800 h-48 rounded-xl mb-4"></div>
+                  <div className="bg-gray-800 h-6 rounded mb-2"></div>
+                  <div className="bg-gray-800 h-4 rounded"></div>
+                </div>
+              ))
+            ) : (
+              productCategories.slice(0, 3).map((category: any) => (
               <Link key={category.id} href={`/products?category=${category.slug}`}>
                 <Card className="gaming-card rounded-2xl p-6 group cursor-pointer transition-all duration-300 hover:shadow-neon">
                   <div className="relative mb-6">
@@ -112,7 +124,8 @@ export default function Landing() {
                   </div>
                 </Card>
               </Link>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </section>
