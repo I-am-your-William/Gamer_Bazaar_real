@@ -116,6 +116,7 @@ export default function AdminInventory() {
               <TableHeader>
                 <TableRow className="border-gray-700">
                   <TableHead className="text-gray-300">Product</TableHead>
+                  <TableHead className="text-gray-300">SKU</TableHead>
                   <TableHead className="text-gray-300">Price</TableHead>
                   <TableHead className="text-gray-300">Status</TableHead>
                   <TableHead className="text-gray-300">Current Stock</TableHead>
@@ -137,9 +138,14 @@ export default function AdminInventory() {
                         )}
                         <div>
                           <div className="font-medium">{product.name}</div>
-                          <div className="text-sm text-gray-400">{product.brand}</div>
+                          <div className="text-sm text-gray-400">
+                            {product.brand} {product.sku && <span className="text-electric">• SKU: {product.sku}</span>}
+                          </div>
                         </div>
                       </div>
+                    </TableCell>
+                    <TableCell className="text-electric font-mono">
+                      {product.sku || `AUTO_${product.id}`}
                     </TableCell>
                     <TableCell className="text-white">${product.price}</TableCell>
                     <TableCell>
