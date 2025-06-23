@@ -162,7 +162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/products/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id || req.user?.sub;
       const user = await storage.getUser(userId);
       
       if (user?.role !== 'admin') {
@@ -203,7 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Cart routes
   app.get('/api/cart', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id || req.user?.sub;
       const cartItems = await storage.getCartItems(userId);
       res.json(cartItems);
     } catch (error) {
@@ -214,7 +214,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/cart', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id || req.user?.sub;
       const cartItemData = insertCartItemSchema.parse({
         ...req.body,
         userId,
@@ -258,7 +258,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/cart', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id || req.user?.sub;
       await storage.clearCart(userId);
       res.json({ message: "Cart cleared" });
     } catch (error) {
@@ -270,7 +270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Order routes
   app.get('/api/orders', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id || req.user?.sub;
       const user = await storage.getUser(userId);
       
       const orders = user?.role === 'admin' 
@@ -293,7 +293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Order not found" });
       }
       
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id || req.user?.sub;
       const user = await storage.getUser(userId);
       
       // Check if user owns the order or is admin
@@ -310,7 +310,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/orders', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id || req.user?.sub;
       
       // Get cart items
       const cartItems = await storage.getCartItems(userId);
@@ -379,7 +379,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/orders/:id/status', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id || req.user?.sub;
       const user = await storage.getUser(userId);
       
       if (user?.role !== 'admin') {
@@ -400,7 +400,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // QR Code routes
   app.get('/api/qr-codes', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id || req.user?.sub;
       const user = await storage.getUser(userId);
       
       const filters = user?.role === 'admin' 
@@ -468,7 +468,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin analytics
   app.get('/api/analytics', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id || req.user?.sub;
       const user = await storage.getUser(userId);
       
       if (user?.role !== 'admin') {
