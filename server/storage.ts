@@ -195,11 +195,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product> {
+    console.log('Storage updateProduct called with:', { id, product });
     const [updatedProduct] = await db
       .update(products)
       .set({ ...product, updatedAt: new Date() })
       .where(eq(products.id, id))
       .returning();
+    console.log('Storage updateProduct result:', updatedProduct);
     return updatedProduct;
   }
 
