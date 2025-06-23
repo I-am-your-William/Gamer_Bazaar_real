@@ -66,6 +66,7 @@ copy .env.example .env
    SESSION_SECRET=your-secret-key-here
    NODE_ENV=development
    PORT=5000
+   HOST=localhost
    ```
 3. Save and close
 
