@@ -6,6 +6,7 @@ import {
   orders,
   orderItems,
   qrCodes,
+  inventoryItems,
   type User,
   type UpsertUser,
   type Category,
@@ -20,6 +21,8 @@ import {
   type InsertOrderItem,
   type QrCode,
   type InsertQrCode,
+  type InventoryItem,
+  type InsertInventoryItem,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, ilike, sql } from "drizzle-orm";
@@ -75,6 +78,13 @@ export interface IStorage {
     totalOrders: number;
     totalProducts: number;
   }>;
+
+  // Inventory Items operations
+  getInventoryItems(filters?: { productId?: number; status?: string }): Promise<(InventoryItem & { product: Product })[]>;
+  getInventoryItem(uuid: string): Promise<(InventoryItem & { product: Product }) | undefined>;
+  createInventoryItem(item: InsertInventoryItem): Promise<InventoryItem>;
+  updateInventoryItemStatus(uuid: string, status: string, orderId?: number): Promise<InventoryItem>;
+  generateInventoryUUID(productId: number): Promise<string>;
 }
 
 export class DatabaseStorage implements IStorage {

@@ -33,6 +33,7 @@ function Router() {
       <Switch>
         <Route path="/admin" component={AdminDashboard} />
         <Route path="/admin/inventory" component={AdminInventory} />
+        <Route path="/admin/add-inventory" component={AddInventory} />
         <Route path="/admin/orders" component={AdminOrders} />
         <Route path="/admin/qr-management" component={AdminQRManagement} />
         <Route path="/admin-login" component={() => { window.location.href = '/admin'; return null; }} />

@@ -69,6 +69,20 @@ export const products = pgTable("products", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Inventory Items - Individual units with serial numbers and security codes
+export const inventoryItems = pgTable("inventory_items", {
+  id: serial("id").primaryKey(),
+  uuid: varchar("uuid", { length: 100 }).notNull().unique(), // Auto-generated like HPO16_1
+  productId: integer("product_id").references(() => products.id).notNull(),
+  serialNumber: varchar("serial_number", { length: 255 }).notNull(),
+  securityCodeImage: varchar("security_code_image"), // URL to security code image
+  status: varchar("status", { length: 50 }).default("available"), // available, sold, reserved
+  soldAt: timestamp("sold_at"),
+  orderId: integer("order_id").references(() => orders.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Shopping cart
 export const cartItems = pgTable("cart_items", {
   id: serial("id").primaryKey(),
@@ -188,6 +202,17 @@ export const qrCodesRelations = relations(qrCodes, ({ one }) => ({
   }),
 }));
 
+export const inventoryItemsRelations = relations(inventoryItems, ({ one }) => ({
+  product: one(products, {
+    fields: [inventoryItems.productId],
+    references: [products.id],
+  }),
+  order: one(orders, {
+    fields: [inventoryItems.orderId],
+    references: [orders.id],
+  }),
+}));
+
 // Insert schemas
 export const insertCategorySchema = createInsertSchema(categories).omit({
   id: true,
@@ -236,3 +261,5 @@ export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertOrderItem = z.infer<typeof insertOrderItemSchema>;
 export type QrCode = typeof qrCodes.$inferSelect;
 export type InsertQrCode = z.infer<typeof insertQrCodeSchema>;
+export type InventoryItem = typeof inventoryItems.$inferSelect;
+export type InsertInventoryItem = z.infer<typeof insertInventoryItemSchema>;
