@@ -165,6 +165,14 @@ export function setupLocalAuth(app: Express) {
     });
   });
 
+  // Logout route that redirects (for direct browser access)
+  app.get("/api/logout", (req, res, next) => {
+    req.logout((err) => {
+      if (err) return next(err);
+      res.redirect('/');
+    });
+  });
+
   // Get current user
   app.get("/api/auth/user", (req, res) => {
     if (!req.isAuthenticated()) {
