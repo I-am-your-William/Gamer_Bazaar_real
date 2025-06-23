@@ -117,7 +117,7 @@ export default function InventoryUnits() {
                   <SelectValue placeholder="Filter by product" />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-600">
-                  <SelectItem value="" className="text-white hover:bg-gray-700">All Products</SelectItem>
+                  <SelectItem value="all" className="text-white hover:bg-gray-700">All Products</SelectItem>
                   {products?.products?.map((product) => (
                     <SelectItem 
                       key={product.id} 
@@ -134,7 +134,7 @@ export default function InventoryUnits() {
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-600">
-                  <SelectItem value="" className="text-white hover:bg-gray-700">All Status</SelectItem>
+                  <SelectItem value="all" className="text-white hover:bg-gray-700">All Status</SelectItem>
                   <SelectItem value="available" className="text-white hover:bg-gray-700">Available</SelectItem>
                   <SelectItem value="sold" className="text-white hover:bg-gray-700">Sold</SelectItem>
                   <SelectItem value="reserved" className="text-white hover:bg-gray-700">Reserved</SelectItem>

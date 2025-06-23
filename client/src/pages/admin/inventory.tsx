@@ -14,7 +14,7 @@ import type { Product } from '@shared/schema';
 export default function AdminInventory() {
   const { toast } = useToast();
   const { adminLogout } = useAdminAuth();
-  const [stockUpdates, setStockUpdates] = useState<{ [key: number]: number }>({});
+  // Removed stock update controls - only unit-based management allowed
 
   const handleLogout = () => {
     adminLogout();
@@ -25,43 +25,7 @@ export default function AdminInventory() {
     queryKey: ['/api/products'],
   });
 
-  const updateStockMutation = useMutation({
-    mutationFn: async ({ productId, stockQuantity }: { productId: number; stockQuantity: number }) => {
-      const res = await apiRequest("PATCH", `/api/products/${productId}`, { stockQuantity });
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
-      toast({
-        title: "Success",
-        description: "Stock updated successfully",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update stock",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleStockUpdate = (productId: number) => {
-    const newStock = stockUpdates[productId];
-    if (newStock !== undefined && newStock >= 0) {
-      updateStockMutation.mutate({ productId, stockQuantity: newStock });
-      setStockUpdates(prev => ({ ...prev, [productId]: undefined }));
-    }
-  };
-
-  const adjustStock = (productId: number, adjustment: number) => {
-    const product = products?.products?.find(p => p.id === productId);
-    if (product) {
-      const currentStock = stockUpdates[productId] !== undefined ? stockUpdates[productId] : product.stockQuantity;
-      const newStock = Math.max(0, currentStock + adjustment);
-      setStockUpdates(prev => ({ ...prev, [productId]: newStock }));
-    }
-  };
+  // Stock can only be managed through individual units now
 
   if (productsLoading) {
     return (
@@ -122,9 +86,16 @@ export default function AdminInventory() {
           </div>
         </div>
 
+        <div className="mb-4 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+          <p className="text-blue-200 text-sm">
+            <strong>Note:</strong> Stock can only be increased by adding individual units with serial numbers and security codes. 
+            Use "Add Unit" to increase inventory count.
+          </p>
+        </div>
+
         <Card className="bg-gray-800/50 border-gray-700">
           <CardHeader>
-            <CardTitle className="text-white">Product Inventory</CardTitle>
+            <CardTitle className="text-white">Product Inventory Overview</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
@@ -134,8 +105,7 @@ export default function AdminInventory() {
                   <TableHead className="text-gray-300">SKU</TableHead>
                   <TableHead className="text-gray-300">Price</TableHead>
                   <TableHead className="text-gray-300">Status</TableHead>
-                  <TableHead className="text-gray-300">Current Stock</TableHead>
-                  <TableHead className="text-gray-300">Update Stock</TableHead>
+                  <TableHead className="text-gray-300">Available Units</TableHead>
                   <TableHead className="text-gray-300">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -168,43 +138,29 @@ export default function AdminInventory() {
                         {product.stockQuantity > 0 ? "In Stock" : "Out of Stock"}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-white">
-                      {stockUpdates[product.id] !== undefined ? stockUpdates[product.id] : product.stockQuantity}
+                    <TableCell className="text-white text-center">
+                      <span className="text-2xl font-bold text-electric">{product.stockQuantity}</span>
+                      <div className="text-xs text-gray-400">Available Units</div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
+                      <div className="flex gap-2">
                         <Button
-                          variant="outline"
+                          onClick={() => window.location.href = '/admin/add-inventory'}
                           size="sm"
-                          onClick={() => adjustStock(product.id, -1)}
-                          className="text-white border-gray-600 hover:bg-gray-700"
+                          className="bg-gaming-orange hover:bg-gaming-orange/80"
                         >
-                          <Minus className="h-4 w-4" />
+                          <Plus className="h-4 w-4 mr-1" />
+                          Add Unit
                         </Button>
-                        <Input
-                          type="number"
-                          value={stockUpdates[product.id] !== undefined ? stockUpdates[product.id] : product.stockQuantity}
-                          onChange={(e) => setStockUpdates(prev => ({ ...prev, [product.id]: parseInt(e.target.value) || 0 }))}
-                          className="w-20 bg-gray-800 border-gray-600 text-white"
-                        />
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => adjustStock(product.id, 1)}
+                          onClick={() => window.location.href = `/admin/inventory-units?productId=${product.id}`}
                           className="text-white border-gray-600 hover:bg-gray-700"
                         >
-                          <Plus className="h-4 w-4" />
+                          View Units
                         </Button>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        onClick={() => handleStockUpdate(product.id)}
-                        disabled={updateStockMutation.isPending || stockUpdates[product.id] === undefined}
-                        className="bg-gaming-orange hover:bg-gaming-orange/80"
-                      >
-                        Update
-                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}

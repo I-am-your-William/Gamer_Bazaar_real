@@ -186,16 +186,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update product stock (admin only)
+  // Update product (admin only) - Stock updates disabled, use inventory units instead
   app.patch('/api/products/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const updates = req.body;
       
-      console.log('Stock update request:', { id, updates });
+      // Block direct stock quantity updates
+      if (updates.stockQuantity !== undefined) {
+        return res.status(400).json({ 
+          message: "Direct stock updates are disabled. Use inventory units to manage stock." 
+        });
+      }
       
       const product = await storage.updateProduct(id, updates);
-      console.log('Updated product:', product);
       res.json(product);
     } catch (error) {
       console.error("Error updating product:", error);

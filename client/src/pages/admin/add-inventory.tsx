@@ -59,9 +59,10 @@ export default function AddInventory() {
       }
 
       const res = await apiRequest('POST', '/api/inventory-units', {
-        ...data,
+        productId: data.productId,
+        serialNumber: data.serialNumber,
         securityCodeImageUrl,
-        createdBy: 'admin', // TODO: Get actual admin user ID
+        createdBy: 'admin',
       });
       return res.json();
     },
