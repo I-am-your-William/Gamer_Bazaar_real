@@ -138,15 +138,15 @@ export default function AddInventoryUnit() {
         
         if (!res.ok) {
           const errorText = await res.text();
+          console.error('Server error response:', errorText);
           throw new Error(`Server error: ${res.status} - ${errorText}`);
         }
         
         const result = await res.json();
-        console.log('Server response:', result);
+        console.log('Success! Server response:', result);
         return result;
       } catch (error) {
-        console.error('Caught error in mutation function:', error);
-        // Re-throw to let React Query handle it
+        console.error('Error in mutation function:', error);
         throw error;
       }
     },
