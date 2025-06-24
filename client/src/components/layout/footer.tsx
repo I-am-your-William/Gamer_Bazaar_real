@@ -51,12 +51,12 @@ export default function Footer() {
             <h4 className="font-orbitron font-bold text-lg mb-6">PRODUCTS</h4>
             <ul className="space-y-3 text-gray-400">
               {[
-                { href: '/products?category=gaming-pcs', label: 'Gaming PCs' },
-                { href: '/products?category=laptops', label: 'Gaming Laptops' },
-                { href: '/products?category=keyboards', label: 'Keyboards & Mice' },
-                { href: '/products?category=headsets', label: 'Headsets' },
-                { href: '/products?category=monitors', label: 'Monitors' },
-                { href: '/products?category=components', label: 'Components' },
+                { href: '/products', label: 'Gaming PCs' },
+                { href: '/products', label: 'Gaming Laptops' },
+                { href: '/products', label: 'Keyboards & Mice' },
+                { href: '/products', label: 'Headsets' },
+                { href: '/products', label: 'Monitors' },
+                { href: '/products', label: 'Gaming Chairs' },
               ].map((item) => (
                 <li key={item.href}>
                   <Link href={item.href}>
@@ -75,11 +75,11 @@ export default function Footer() {
             <ul className="space-y-3 text-gray-400">
               {[
                 { href: '/verify', label: 'Product Verification' },
-                { href: '/warranty', label: 'Warranty Claims' },
-                { href: '/support', label: 'Customer Service' },
-                { href: '/returns', label: 'Return Policy' },
-                { href: '/faq', label: 'FAQ' },
-                { href: '/contact', label: 'Contact Us' },
+                { href: '/qr-scanner', label: 'QR Scanner' },
+                { href: '/orders', label: 'Order Tracking' },
+                { href: '/products', label: 'Browse Products' },
+                { href: '/auth', label: 'Account Login' },
+                { href: '/', label: 'Help Center' },
               ].map((item) => (
                 <li key={item.href}>
                   <Link href={item.href}>
