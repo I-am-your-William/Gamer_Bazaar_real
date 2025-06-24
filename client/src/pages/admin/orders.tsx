@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ORDER_STATUSES } from '@/lib/constants';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
-import { Package, User, MapPin, Calendar, DollarSign, Search, Filter } from 'lucide-react';
+import { Package, User, MapPin, Calendar, DollarSign, Search, Filter, ArrowLeft } from 'lucide-react';
 
 interface Order {
   id: number;
@@ -143,6 +143,17 @@ export default function AdminOrders() {
   return (
     <div className="p-6">
       <div className="mb-8">
+        <div className="flex items-center gap-4 mb-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/admin')}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 border-primary"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </div>
         <h1 className="text-3xl font-bold mb-2">Order Management</h1>
         <p className="text-muted-foreground">
           Manage and track all customer orders
