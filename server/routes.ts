@@ -654,6 +654,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         productId,
         serialNumber,
         securityCodeImageUrl: securityCodeImageUrl || null,
+        certificateUrl: certificateUrl || null,
         status: 'available',
         createdBy,
       };

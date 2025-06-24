@@ -51,7 +51,7 @@ function Router() {
       <Switch>
         <Route path="/admin" component={AdminDashboard} />
         <Route path="/admin/inventory" component={AdminInventory} />
-        <Route path="/admin/add-inventory" component={AddInventory} />
+        <Route path="/admin/add-inventory-unit" component={AddInventoryUnit} />
         <Route path="/admin/add-product" component={AddProduct} />
         <Route path="/admin/inventory-units" component={InventoryUnits} />
         <Route path="/admin/orders" component={AdminOrders} />
