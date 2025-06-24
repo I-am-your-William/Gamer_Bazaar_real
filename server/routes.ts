@@ -634,58 +634,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post('/api/inventory-units', async (req, res) => {
+    // FORCE JSON response headers immediately
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'no-cache');
+    
     try {
-      // Ensure we always return JSON
-      res.setHeader('Content-Type', 'application/json');
-      
       const { productId, serialNumber, securityCodeImageUrl, certificateUrl, createdBy } = req.body;
       
-      console.log('Received request body:', req.body);
-      console.log('Creating inventory unit:', { productId, serialNumber, securityCodeImageUrl, certificateUrl, createdBy });
+      console.log('=== INVENTORY UNIT CREATION START ===');
+      console.log('Request body:', JSON.stringify(req.body, null, 2));
       
       // Validate required fields
       if (!productId || !serialNumber || !createdBy) {
-        return res.status(400).json({ message: "Product ID, serial number, and creator are required" });
+        console.log('Validation failed - missing required fields');
+        return res.status(400).json({ 
+          success: false,
+          message: "Product ID, serial number, and creator are required" 
+        });
       }
 
-      // Generate unique unit ID first
-      const unitId = await storage.generateUnitId(productId);
+      // Generate unique unit ID with fallback
+      let unitId;
+      try {
+        unitId = await storage.generateUnitId(productId);
+        console.log('Generated unitId:', unitId);
+      } catch (error) {
+        console.warn('Unit ID generation failed, using fallback:', error);
+        unitId = `FALLBACK_${productId}_${Date.now()}`;
+      }
       
-      // Create unit data without checking for duplicates (let database handle unique constraint)
+      // Create unit data
       const unitData = {
         unitId,
-        productId,
-        serialNumber,
+        productId: Number(productId),
+        serialNumber: String(serialNumber),
         securityCodeImageUrl: securityCodeImageUrl || null,
         certificateUrl: certificateUrl || null,
         status: 'available',
-        createdBy,
+        createdBy: String(createdBy),
       };
       
-      console.log('Unit data to create:', unitData);
+      console.log('Creating unit with data:', JSON.stringify(unitData, null, 2));
       
       const unit = await storage.createInventoryUnit(unitData);
+      console.log('Unit created successfully:', JSON.stringify(unit, null, 2));
       
-      console.log('Created unit:', unit);
-      
-      res.json({
+      const response = {
+        success: true,
         ...unit,
         message: `Inventory unit ${unitId} added successfully. Stock count updated.`
-      });
-    } catch (error) {
-      console.error("Full error creating inventory unit:", error);
-      console.error("Error name:", error.name);
-      console.error("Error message:", error.message);
-      console.error("Error stack:", error.stack);
+      };
       
-      // Ensure we return JSON even on error
-      res.setHeader('Content-Type', 'application/json');
-      return res.status(500).json({ 
-        message: error.message || "Failed to create inventory unit",
-        error: error.toString(),
-        errorName: error.name,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-      });
+      console.log('Sending response:', JSON.stringify(response, null, 2));
+      console.log('=== INVENTORY UNIT CREATION SUCCESS ===');
+      
+      return res.status(200).json(response);
+      
+    } catch (error) {
+      console.error("=== INVENTORY UNIT CREATION ERROR ===");
+      console.error("Error:", error);
+      console.error("Error name:", error?.name);
+      console.error("Error message:", error?.message);
+      console.error("Error stack:", error?.stack);
+      
+      const errorResponse = { 
+        success: false,
+        message: error?.message || "Failed to create inventory unit",
+        error: error?.toString(),
+        errorName: error?.name
+      };
+      
+      console.log('Sending error response:', JSON.stringify(errorResponse, null, 2));
+      console.log('=== INVENTORY UNIT CREATION ERROR END ===');
+      
+      return res.status(500).json(errorResponse);
     }
   });
 

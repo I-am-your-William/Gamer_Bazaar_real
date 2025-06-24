@@ -173,22 +173,42 @@ export default function AddInventoryUnit() {
           credentials: 'include',
         });
         
+        console.log('Response status:', res.status);
+        console.log('Response headers:', Object.fromEntries(res.headers.entries()));
+        
         const responseText = await res.text();
-        console.log('Raw server response:', responseText);
+        console.log('Raw response length:', responseText.length);
+        console.log('Raw response (first 200 chars):', responseText.substring(0, 200));
         
         if (!res.ok) {
-          console.error('Server error response:', responseText);
-          throw new Error(`Server error: ${res.status} - ${responseText}`);
+          console.error('❌ Server returned error status:', res.status);
+          console.error('Error response:', responseText);
+          throw new Error(`Server error ${res.status}: ${responseText}`);
+        }
+        
+        if (!responseText.trim()) {
+          console.error('❌ Empty response from server');
+          throw new Error('Empty response from server');
+        }
+        
+        if (!responseText.startsWith('{') && !responseText.startsWith('[')) {
+          console.error('❌ Response is not JSON, starts with:', responseText.substring(0, 50));
+          throw new Error(`Server returned HTML instead of JSON: ${responseText.substring(0, 100)}...`);
         }
         
         try {
           const result = JSON.parse(responseText);
-          console.log('Success! Parsed response:', result);
+          console.log('✅ Successfully parsed JSON response:', result);
+          
+          if (result.success === false) {
+            throw new Error(result.message || 'Server reported failure');
+          }
+          
           return result;
         } catch (parseError) {
-          console.error('JSON parse error:', parseError);
-          console.error('Response was:', responseText);
-          throw new Error('Invalid server response format');
+          console.error('❌ JSON parse failed:', parseError);
+          console.error('Response text:', responseText);
+          throw new Error(`Invalid JSON from server: ${parseError.message}`);
         }
       } catch (error) {
         console.error('Error in mutation function:', error);
