@@ -96,7 +96,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <Link href="/admin/inventory">
-                <Button className="w-full bg-gaming-orange hover:bg-gaming-orange/80">
+                <Button className="w-full bg-sky-400 hover:bg-sky-500 text-white">
                   Manage Inventory
                 </Button>
               </Link>
