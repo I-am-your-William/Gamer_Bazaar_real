@@ -418,8 +418,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin orders endpoint - get all orders
-  app.get('/api/admin/orders', isAuthenticated, async (req: any, res) => {
+  app.get('/api/admin/orders', async (req: any, res) => {
     try {
+      // Check if user is authenticated and is admin
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
       const userId = req.user?.id || req.user?.sub;
       const user = await storage.getUser(userId);
       
@@ -436,8 +441,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/admin/orders/:id/status', isAuthenticated, async (req: any, res) => {
+  app.patch('/api/admin/orders/:id/status', async (req: any, res) => {
     try {
+      // Check if user is authenticated and is admin
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
       const userId = req.user?.id || req.user?.sub;
       const user = await storage.getUser(userId);
       
