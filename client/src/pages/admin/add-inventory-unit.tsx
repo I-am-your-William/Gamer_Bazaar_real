@@ -48,7 +48,21 @@ export default function AddInventoryUnit() {
 
   const { data: products, isLoading: productsLoading } = useQuery<{ products: Product[]; total: number }>({
     queryKey: ['/api/products'],
-    queryFn: () => fetch('/api/products?limit=100').then(res => res.json()),
+    queryFn: async () => {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      
+      try {
+        const res = await fetch('/api/products?limit=100', {
+          signal: controller.signal
+        });
+        clearTimeout(timeout);
+        return res.json();
+      } catch (error) {
+        clearTimeout(timeout);
+        throw error;
+      }
+    },
   });
 
   // Pre-select product if coming from inventory page

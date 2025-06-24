@@ -65,7 +65,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Category routes
   app.get('/api/categories', async (req, res) => {
     try {
-      const categories = await storage.getCategories();
+      const categories = await Promise.race([
+        storage.getCategories(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Categories request timeout')), 10000)
+        )
+      ]);
       res.json(categories);
     } catch (error) {
       console.error("Error fetching categories:", error);

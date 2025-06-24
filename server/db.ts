@@ -21,12 +21,12 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// Create pool with better error handling and connection settings
+// Create pool with optimized settings for Replit
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
-  max: 3, // Increase pool size slightly
-  idleTimeoutMillis: 30000, // 30 seconds
-  connectionTimeoutMillis: 10000, // 10 seconds
+  max: 2,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 5000,
 });
 
 // Add error handling for the pool
