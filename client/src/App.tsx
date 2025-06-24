@@ -21,7 +21,7 @@ import QRScannerPage from "@/pages/qr-scanner";
 import ProductAuthentication from "@/pages/product-authentication";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminInventory from "@/pages/admin/inventory";
-import AddInventoryUnit from "@/pages/admin/add-inventory-unit";
+import AddInventoryUnitSimple from "@/pages/admin/add-inventory-unit-simple";
 import AddProduct from "@/pages/admin/add-product";
 import InventoryUnits from "@/pages/admin/inventory-units";
 import AdminOrders from "@/pages/admin/orders";
@@ -51,7 +51,7 @@ function Router() {
       <Switch>
         <Route path="/admin" component={AdminDashboard} />
         <Route path="/admin/inventory" component={AdminInventory} />
-        <Route path="/admin/add-inventory-unit" component={AddInventoryUnit} />
+        <Route path="/admin/add-inventory-unit" component={AddInventoryUnitSimple} />
         <Route path="/admin/add-product" component={AddProduct} />
         <Route path="/admin/inventory-units" component={InventoryUnits} />
         <Route path="/admin/orders" component={AdminOrders} />

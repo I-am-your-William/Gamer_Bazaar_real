@@ -133,6 +133,8 @@ Gamer Bazaar is a comprehensive e-commerce platform designed specifically for ga
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Priority: Fix functionality immediately without loading delays or complex queries.
+Cost concern: User frustrated with $2 spent on basic functionality - prioritize direct working solutions.
 
 ## Changelog
 
