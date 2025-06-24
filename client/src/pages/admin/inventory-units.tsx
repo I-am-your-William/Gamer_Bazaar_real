@@ -74,7 +74,7 @@ export default function InventoryUnits() {
           <div className="flex gap-4">
             <Button 
               onClick={() => window.location.href = '/admin/add-inventory'}
-              className="bg-gaming-orange hover:bg-gaming-orange/80"
+              className="bg-green-500 hover:bg-green-600 text-white"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Unit

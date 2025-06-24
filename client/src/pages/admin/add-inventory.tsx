@@ -239,7 +239,7 @@ export default function AddInventory() {
                 <Button
                   type="submit"
                   disabled={addInventoryMutation.isPending}
-                  className="w-full bg-gaming-orange hover:bg-gaming-orange/80"
+                  className="w-full bg-green-500 hover:bg-green-600 text-white"
                 >
                   {addInventoryMutation.isPending ? 'Adding Unit...' : 'Add Unit to Inventory'}
                 </Button>

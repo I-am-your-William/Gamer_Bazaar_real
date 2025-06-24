@@ -65,7 +65,7 @@ export default function AdminInventory() {
             </Button>
             <Button 
               onClick={() => window.location.href = '/admin/add-inventory'}
-              className="bg-gaming-orange hover:bg-gaming-orange/80"
+              className="bg-green-500 hover:bg-green-600 text-white"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Unit
@@ -173,7 +173,7 @@ export default function AdminInventory() {
                         <Button
                           onClick={() => window.location.href = '/admin/add-inventory'}
                           size="sm"
-                          className="bg-gaming-orange hover:bg-gaming-orange/80"
+                          className="bg-green-500 hover:bg-green-600 text-white"
                         >
                           <Plus className="h-4 w-4 mr-1" />
                           Add Unit
