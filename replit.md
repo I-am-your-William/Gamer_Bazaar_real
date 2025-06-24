@@ -156,3 +156,4 @@ Preferred communication style: Simple, everyday language.
   - Navigation buttons with highlighted styling (Back to Dashboard)
   - Fixed React rendering errors for mixed address formats
   - Updated inventory button styling to light blue as requested
+  - Updated inventory page buttons: "Add Unit" buttons changed to green, "Add New Product" button prominently displayed

@@ -61,14 +61,7 @@ export default function AdminInventory() {
               className="bg-gaming-blue hover:bg-gaming-blue/80"
             >
               <Package className="w-4 h-4 mr-2" />
-              Add Product
-            </Button>
-            <Button 
-              onClick={() => window.location.href = '/admin/add-inventory'}
-              className="bg-green-500 hover:bg-green-600 text-white"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Unit
+              Add New Product
             </Button>
             <Button 
               variant="outline" 
