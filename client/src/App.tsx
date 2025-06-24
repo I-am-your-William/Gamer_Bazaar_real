@@ -18,6 +18,7 @@ import OrderTracking from "@/pages/order-tracking";
 import OrderSuccess from "@/pages/order-success";
 import Verify from "@/pages/verify";
 import QRScannerPage from "@/pages/qr-scanner";
+import ProductAuthentication from "@/pages/product-authentication";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminInventory from "@/pages/admin/inventory";
 import AddInventory from "@/pages/admin/add-inventory";
@@ -69,6 +70,7 @@ function Router() {
           <Route path="/" component={Landing} />
           <Route path="/verify/:code" component={Verify} />
           <Route path="/qr-scanner" component={QRScannerPage} />
+          <Route path="/authenticate/:code" component={ProductAuthentication} />
           <Route path="/products" component={Products} />
           <Route path="/products/:slug" component={ProductDetail} />
           <Route path="/admin-login" component={AdminLogin} />
@@ -87,6 +89,7 @@ function Router() {
           <Route path="/order-success/:id" component={OrderSuccess} />
           <Route path="/verify/:code" component={Verify} />
           <Route path="/qr-scanner" component={QRScannerPage} />
+          <Route path="/authenticate/:code" component={ProductAuthentication} />
           <Route path="/admin-login" component={AdminLogin} />
           <Route path="/auth" component={AuthPage} />
           <Route component={NotFound} />

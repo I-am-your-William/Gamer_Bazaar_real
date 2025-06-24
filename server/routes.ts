@@ -509,6 +509,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { status } = req.body;
       
       const order = await storage.updateOrderStatus(id, status);
+      
+      // If order is delivered, deactivate QR codes
+      if (status === 'delivered') {
+        const qrCodes = await storage.getQrCodes({ orderId: id });
+        for (const qrCode of qrCodes) {
+          await storage.deactivateQrCode(qrCode.code);
+        }
+      }
+      
       res.json(order);
     } catch (error) {
       console.error("Error updating order status:", error);

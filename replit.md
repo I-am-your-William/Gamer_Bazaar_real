@@ -158,3 +158,10 @@ Preferred communication style: Simple, everyday language.
   - Updated inventory button styling to light blue as requested
   - Updated inventory page buttons: "Add Unit" buttons changed to green, "Add New Product" button prominently displayed
   - **Fixed Footer 404 Errors**: Updated footer links to point to existing pages instead of undefined routes that were causing 404 errors at bottom of homepage
+- **QR Code Generation System**: Implemented comprehensive QR code system with:
+  - Automatic QR code generation when orders are placed
+  - QR codes visible to both admin and users until product delivery
+  - Product authentication page showing product details and certificates
+  - Certificate upload functionality in inventory unit creation
+  - QR code deactivation when orders are marked as delivered
+  - Clear separation between active and inactive QR codes

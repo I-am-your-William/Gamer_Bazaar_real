@@ -75,6 +75,7 @@ export interface IStorage {
   getQrCode(code: string): Promise<(QrCode & { product: Product; order: Order; user: User }) | undefined>;
   createQrCode(qrCode: InsertQrCode): Promise<QrCode>;
   verifyQrCode(code: string, verificationData?: any): Promise<QrCode>;
+  deactivateQrCode(code: string): Promise<QrCode>;
 
   // Analytics
   getSalesAnalytics(): Promise<{
@@ -461,6 +462,22 @@ export class DatabaseStorage implements IStorage {
       .where(eq(qrCodes.code, code))
       .returning();
     return verifiedQrCode;
+  }
+
+  async deactivateQrCode(code: string): Promise<QrCode> {
+    const [qrCode] = await db
+      .update(qrCodes)
+      .set({
+        isActive: false,
+      })
+      .where(eq(qrCodes.code, code))
+      .returning();
+
+    if (!qrCode) {
+      throw new Error("QR code not found");
+    }
+
+    return qrCode;
   }
 
   // Analytics

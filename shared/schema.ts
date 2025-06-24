@@ -126,13 +126,15 @@ export const orderItems = pgTable("order_items", {
 // QR codes for product verification
 export const qrCodes = pgTable("qr_codes", {
   id: serial("id").primaryKey(),
-  code: uuid("code").defaultRandom().notNull().unique(),
+  code: varchar("code", { length: 100 }).notNull().unique(),
   orderId: integer("order_id").references(() => orders.id).notNull(),
   productId: integer("product_id").references(() => products.id).notNull(),
   userId: varchar("user_id").references(() => users.id).notNull(),
+  unitId: varchar("unit_id").references(() => inventoryUnits.unitId),
   serialNumber: varchar("serial_number", { length: 100 }).notNull(),
   isVerified: boolean("is_verified").default(false),
   verifiedAt: timestamp("verified_at"),
+  isActive: boolean("is_active").default(true),
   verificationData: jsonb("verification_data"),
   emailSent: boolean("email_sent").default(false),
   createdAt: timestamp("created_at").defaultNow(),
