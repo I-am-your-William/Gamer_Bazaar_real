@@ -14,7 +14,8 @@ export default function Landing() {
 
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ['/api/products', { limit: 8 }],
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    queryFn: () => fetch('/api/products?limit=8').then(res => res.json()),
+    staleTime: 0, // Fresh data to show new products
   });
 
   const { data: categories, isLoading: categoriesLoading } = useQuery({

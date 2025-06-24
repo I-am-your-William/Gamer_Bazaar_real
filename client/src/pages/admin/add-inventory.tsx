@@ -30,7 +30,9 @@ export default function AddInventory() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const { data: products, isLoading: productsLoading } = useQuery<{ products: Product[]; total: number }>({
-    queryKey: ['/api/products'],
+    queryKey: ['/api/products', 'add-inventory'],
+    queryFn: () => fetch('/api/products?limit=50').then(res => res.json()),
+    staleTime: 0,
   });
 
   const form = useForm<AddInventoryFormData>({
@@ -41,6 +43,9 @@ export default function AddInventory() {
       securityCodeImageUrl: '',
     },
   });
+
+  console.log('Add Inventory - Products available:', products?.products?.length);
+  console.log('Add Inventory - Product names:', products?.products?.map(p => p.name));
 
   const addInventoryMutation = useMutation({
     mutationFn: async (data: AddInventoryFormData) => {

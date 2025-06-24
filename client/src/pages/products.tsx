@@ -38,6 +38,16 @@ export default function Products() {
       limit: itemsPerPage,
       offset: (currentPage - 1) * itemsPerPage 
     }],
+    queryFn: () => {
+      const params = new URLSearchParams({
+        limit: itemsPerPage.toString(),
+        offset: ((currentPage - 1) * itemsPerPage).toString(),
+        ...(selectedCategory && { category: selectedCategory }),
+        ...(searchQuery && { search: searchQuery })
+      });
+      return fetch(`/api/products?${params}`).then(res => res.json());
+    },
+    staleTime: 0,
   });
 
   const products = productsData?.products || [];
