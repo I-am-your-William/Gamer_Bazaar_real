@@ -406,7 +406,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await emailService.sendOrderConfirmation(user.email, order, enhancedOrderItems);
       }
       
-      res.json(order);
+      // Invalidate cart data to refresh UI
+      res.json({
+        ...order,
+        cartCleared: true
+      });
     } catch (error) {
       console.error("Error creating order:", error);
       res.status(500).json({ message: "Failed to create order" });

@@ -13,6 +13,9 @@ import Products from "@/pages/products";
 import ProductDetail from "@/pages/product-detail";
 import Cart from "@/pages/cart";
 import Checkout from "@/pages/checkout";
+import Orders from "@/pages/orders";
+import OrderTracking from "@/pages/order-tracking";
+import OrderSuccess from "@/pages/order-success";
 import Verify from "@/pages/verify";
 import QRScannerPage from "@/pages/qr-scanner";
 import AdminDashboard from "@/pages/admin/dashboard";
@@ -79,6 +82,9 @@ function Router() {
           <Route path="/products/:slug" component={ProductDetail} />
           <Route path="/cart" component={Cart} />
           <Route path="/checkout" component={Checkout} />
+          <Route path="/orders" component={Orders} />
+          <Route path="/orders/:id" component={OrderTracking} />
+          <Route path="/order-success/:id" component={OrderSuccess} />
           <Route path="/verify/:code" component={Verify} />
           <Route path="/qr-scanner" component={QRScannerPage} />
           <Route path="/admin-login" component={AdminLogin} />

@@ -69,13 +69,16 @@ export default function Checkout() {
       return await res.json();
     },
     onSuccess: (order) => {
+      // Force refresh cart data immediately
+      queryClient.setQueryData(['/api/cart'], []);
       queryClient.invalidateQueries({ queryKey: ['/api/cart'] });
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
       toast({
         title: "Order Placed Successfully!",
         description: `Order #${order.id} has been created. You will receive a confirmation email shortly.`,
       });
-      navigate(`/orders/${order.id}`);
+      navigate(`/order-success/${order.id}`);
     },
     onError: (error: any) => {
       toast({
