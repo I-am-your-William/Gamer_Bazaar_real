@@ -76,7 +76,7 @@ export default function OrderSuccess() {
     );
   }
 
-  const totalItems = order.orderItems.reduce((sum, item) => sum + item.quantity, 0);
+  const totalItems = order?.orderItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -151,7 +151,7 @@ export default function OrderSuccess() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {order.orderItems.map((item, index) => (
+            {(order.orderItems || []).map((item, index) => (
               <div key={item.id} className="flex items-center gap-4">
                 <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center">
                   {item.product.imageUrl ? (
@@ -176,7 +176,11 @@ export default function OrderSuccess() {
                   </p>
                 </div>
               </div>
-            ))}
+            )) || (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No items found in this order</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
