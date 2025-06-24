@@ -665,10 +665,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: `Inventory unit ${unitId} added successfully. Stock count updated.`
       });
     } catch (error) {
-      console.error("Error creating inventory unit:", error);
+      console.error("Full error creating inventory unit:", error);
+      console.error("Error name:", error.name);
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
       res.status(500).json({ 
         message: error.message || "Failed to create inventory unit",
         error: error.toString(),
+        errorName: error.name,
         stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }

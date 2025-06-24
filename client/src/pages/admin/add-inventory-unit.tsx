@@ -136,31 +136,36 @@ export default function AddInventoryUnit() {
           credentials: 'include',
         });
         
-        const responseText = await res.text();
-        console.log('Server response:', responseText);
-        
         if (!res.ok) {
-          throw new Error(`Server error: ${res.status} - ${responseText}`);
+          const errorText = await res.text();
+          throw new Error(`Server error: ${res.status} - ${errorText}`);
         }
         
-        return JSON.parse(responseText);
+        const result = await res.json();
+        console.log('Server response:', result);
+        return result;
       } catch (error) {
-        console.error('Error creating inventory unit:', error);
+        console.error('Caught error in mutation function:', error);
+        // Re-throw to let React Query handle it
         throw error;
       }
     },
     onSuccess: (data) => {
+      console.log('Mutation success with data:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/inventory-units'] });
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
       toast({
-        title: "Success",
-        description: `Inventory unit ${data.unitId} added successfully`,
+        title: "Success", 
+        description: data.message || `Inventory unit ${data.unitId} added successfully`,
       });
       form.reset();
       setSecurityImagePreview(null);
       setCertificateFileName('');
     },
     onError: (error: any) => {
+      console.error('Full error object:', error);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
       toast({
         title: "Error",
         description: error.message || "Failed to add inventory unit",
