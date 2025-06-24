@@ -81,12 +81,15 @@ export function setupLocalAuth(app: Express) {
 
   passport.serializeUser((user, done) => {
     console.log('Serializing user:', user);
+    console.log('User ID being stored in session:', user.id);
     done(null, user.id);
   });
   
   passport.deserializeUser(async (id: string, done) => {
     try {
       console.log('Deserializing user with ID:', id);
+      console.log('ID type:', typeof id, 'ID value:', JSON.stringify(id));
+      
       if (id === 'admin') {
         const adminUser = {
           id: 'admin',
@@ -97,7 +100,7 @@ export function setupLocalAuth(app: Express) {
           createdAt: new Date(),
           updatedAt: new Date(),
         };
-        console.log('Deserializing admin user:', adminUser);
+        console.log('Deserializing admin user successfully:', adminUser);
         return done(null, adminUser);
       }
       
