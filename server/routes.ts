@@ -65,12 +65,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Category routes
   app.get('/api/categories', async (req, res) => {
     try {
-      const categories = await Promise.race([
-        storage.getCategories(),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Categories request timeout')), 10000)
-        )
-      ]);
+      const categories = await storage.getCategories();
       res.json(categories);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -514,15 +509,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { status } = req.body;
       
       const order = await storage.updateOrderStatus(id, status);
-      
-      // If order is delivered, deactivate QR codes
-      if (status === 'delivered') {
-        const qrCodes = await storage.getQrCodes({ orderId: id });
-        for (const qrCode of qrCodes) {
-          await storage.deactivateQrCode(qrCode.code);
-        }
-      }
-      
       res.json(order);
     } catch (error) {
       console.error("Error updating order status:", error);
@@ -634,80 +620,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post('/api/inventory-units', async (req, res) => {
-    // FORCE JSON response headers immediately
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Cache-Control', 'no-cache');
-    
     try {
-      const { productId, serialNumber, securityCodeImageUrl, certificateUrl, createdBy } = req.body;
+      const { productId, serialNumber, securityCodeImageUrl, createdBy } = req.body;
       
-      console.log('=== INVENTORY UNIT CREATION START ===');
-      console.log('Request body:', JSON.stringify(req.body, null, 2));
+      console.log('Creating inventory unit:', { productId, serialNumber, createdBy });
       
       // Validate required fields
       if (!productId || !serialNumber || !createdBy) {
-        console.log('Validation failed - missing required fields');
-        return res.status(400).json({ 
-          success: false,
-          message: "Product ID, serial number, and creator are required" 
-        });
+        return res.status(400).json({ message: "Product ID, serial number, and creator are required" });
       }
 
-      // Generate unique unit ID with fallback
-      let unitId;
-      try {
-        unitId = await storage.generateUnitId(productId);
-        console.log('Generated unitId:', unitId);
-      } catch (error) {
-        console.warn('Unit ID generation failed, using fallback:', error);
-        unitId = `FALLBACK_${productId}_${Date.now()}`;
+      // Check if serial number already exists
+      const existingUnits = await storage.getInventoryUnits();
+      const serialExists = existingUnits.some(unit => unit.serialNumber === serialNumber);
+      if (serialExists) {
+        return res.status(400).json({ message: "Serial number already exists" });
       }
+
+      // Generate unique unit ID
+      const unitId = await storage.generateUnitId(productId);
       
-      // Create unit data
       const unitData = {
         unitId,
-        productId: Number(productId),
-        serialNumber: String(serialNumber),
+        productId,
+        serialNumber,
         securityCodeImageUrl: securityCodeImageUrl || null,
-        certificateUrl: certificateUrl || null,
         status: 'available',
-        createdBy: String(createdBy),
+        createdBy,
       };
       
-      console.log('Creating unit with data:', JSON.stringify(unitData, null, 2));
+      console.log('Unit data to create:', unitData);
       
       const unit = await storage.createInventoryUnit(unitData);
-      console.log('Unit created successfully:', JSON.stringify(unit, null, 2));
       
-      const response = {
-        success: true,
+      console.log('Created unit:', unit);
+      
+      res.json({
         ...unit,
         message: `Inventory unit ${unitId} added successfully. Stock count updated.`
-      };
-      
-      console.log('Sending response:', JSON.stringify(response, null, 2));
-      console.log('=== INVENTORY UNIT CREATION SUCCESS ===');
-      
-      return res.status(200).json(response);
-      
+      });
     } catch (error) {
-      console.error("=== INVENTORY UNIT CREATION ERROR ===");
-      console.error("Error:", error);
-      console.error("Error name:", error?.name);
-      console.error("Error message:", error?.message);
-      console.error("Error stack:", error?.stack);
-      
-      const errorResponse = { 
-        success: false,
-        message: error?.message || "Failed to create inventory unit",
-        error: error?.toString(),
-        errorName: error?.name
-      };
-      
-      console.log('Sending error response:', JSON.stringify(errorResponse, null, 2));
-      console.log('=== INVENTORY UNIT CREATION ERROR END ===');
-      
-      return res.status(500).json(errorResponse);
+      console.error("Error creating inventory unit:", error);
+      res.status(500).json({ message: error.message || "Failed to create inventory unit" });
     }
   });
 

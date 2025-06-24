@@ -4,47 +4,52 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import AdminSidebar from '@/components/admin/sidebar';
 import { QrCode, Search, Eye, Download } from 'lucide-react';
 import { queryClient, apiRequest } from '@/lib/queryClient';
-// Remove type import as it's not defined
+import type { QrCodeWithDetails } from '@/lib/types';
 
 export default function AdminQRManagement() {
   const { toast } = useToast();
-  const { isAdminLoggedIn } = useAdminAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
 
-  if (!isAdminLoggedIn) {
-    return (
-      <div className="min-h-screen bg-deep-black flex items-center justify-center text-white">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">Access Denied</h1>
-          <p className="text-gray-400">Admin access required</p>
-          <Button 
-            onClick={() => window.location.href = '/admin-login'}
-            className="mt-4 bg-electric hover:bg-electric/80"
-          >
-            Go to Admin Login
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      toast({
+        title: "Unauthorized",
+        description: "You are logged out. Logging in again...",
+        variant: "destructive",
+      });
+      setTimeout(() => {
+        window.location.href = "/api/login";
+      }, 500);
+      return;
+    }
+
+    if (!isLoading && user?.role !== 'admin') {
+      toast({
+        title: "Access Denied",
+        description: "Admin access required.",
+        variant: "destructive",
+      });
+      return;
+    }
+  }, [isAuthenticated, isLoading, user, toast]);
 
   const { data: qrCodes, isLoading: qrLoading } = useQuery({
     queryKey: ['/api/qr-codes'],
-    enabled: isAdminLoggedIn,
+    enabled: isAuthenticated && user?.role === 'admin',
   });
 
   const markAsVerifiedMutation = useMutation({
     mutationFn: async (code: string) => {
-      const res = await apiRequest("POST", `/api/verify/${code}`, {
-        verifiedAt: new Date().toISOString(),
+      await apiRequest(`/api/qr-codes/${code}/verify`, {
+        method: 'POST',
       });
-      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/qr-codes'] });
@@ -62,16 +67,30 @@ export default function AdminQRManagement() {
     },
   });
 
-  // Filter QR codes based on search term
-  const filteredQrCodes = qrCodes?.filter((qr: any) => {
-    const searchLower = searchTerm.toLowerCase();
+  const filteredQrCodes = qrCodes?.filter((qr: QrCodeWithDetails) =>
+    qr.product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    qr.order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    qr.serialNumber.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
+  if (isLoading || !user) {
     return (
-      qr.product?.name?.toLowerCase().includes(searchLower) ||
-      qr.order?.id?.toString().includes(searchLower) ||
-      qr.serialNumber?.toLowerCase().includes(searchLower) ||
-      qr.code?.toLowerCase().includes(searchLower)
+      <div className="min-h-screen bg-deep-black flex items-center justify-center">
+        <div className="animate-spin h-12 w-12 border-4 border-electric border-t-transparent rounded-full"></div>
+      </div>
     );
-  }) || [];
+  }
+
+  if (user.role !== 'admin') {
+    return (
+      <div className="min-h-screen bg-deep-black flex items-center justify-center text-white">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-4">Access Denied</h1>
+          <p className="text-gray-400">Admin access required</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-deep-black text-white">
@@ -105,7 +124,7 @@ export default function AdminQRManagement() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-neon-green">
-                  {qrCodes?.filter((qr: any) => qr.isVerified).length || 0}
+                  {qrCodes?.filter((qr: QrCodeWithDetails) => qr.isVerified).length || 0}
                 </div>
               </CardContent>
             </Card>
@@ -115,8 +134,8 @@ export default function AdminQRManagement() {
                 <CardTitle className="text-sm font-medium">Pending</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-yellow-500">
-                  {qrCodes?.filter((qr: any) => !qr.isVerified).length || 0}
+                <div className="text-2xl font-bold text-gaming-orange">
+                  {qrCodes?.filter((qr: QrCodeWithDetails) => !qr.isVerified).length || 0}
                 </div>
               </CardContent>
             </Card>
@@ -141,16 +160,16 @@ export default function AdminQRManagement() {
               </div>
             ) : filteredQrCodes.length > 0 ? (
               <div className="grid gap-6">
-                {filteredQrCodes.map((qr: any) => (
+                {filteredQrCodes.map((qr: QrCodeWithDetails) => (
                   <Card key={qr.id} className="gaming-card">
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <div>
-                          <CardTitle className="text-lg">{qr.product?.name || 'Unknown Product'}</CardTitle>
-                          <p className="text-gray-400">Order #{qr.order?.id || qr.orderId}</p>
+                          <CardTitle className="text-lg">{qr.product.name}</CardTitle>
+                          <p className="text-gray-400">Order #{qr.order.orderNumber}</p>
                         </div>
                         <Badge className={
-                          qr.isVerified ? 'bg-green-500 text-white' : 'bg-yellow-500 text-black'
+                          qr.isVerified ? 'bg-neon-green text-deep-black' : 'bg-gaming-orange text-white'
                         }>
                           {qr.isVerified ? 'Verified' : 'Pending'}
                         </Badge>
@@ -178,7 +197,6 @@ export default function AdminQRManagement() {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => window.open(`/authenticate/${qr.code}`, '_blank')}
                           className="border-electric text-electric hover:bg-electric hover:text-deep-black"
                         >
                           <Eye className="h-4 w-4 mr-1" />

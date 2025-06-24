@@ -164,7 +164,7 @@ export default function AdminInventory() {
                     <TableCell>
                       <div className="flex gap-2">
                         <Button
-                          onClick={() => window.location.href = '/admin/add-inventory-unit'}
+                          onClick={() => window.location.href = '/admin/add-inventory'}
                           size="sm"
                           className="bg-green-500 hover:bg-green-600 text-white"
                         >
