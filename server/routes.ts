@@ -632,6 +632,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { productId, serialNumber, securityCodeImageUrl, certificateUrl, createdBy } = req.body;
       
+      console.log('Received request body:', req.body);
       console.log('Creating inventory unit:', { productId, serialNumber, securityCodeImageUrl, certificateUrl, createdBy });
       
       // Validate required fields
@@ -639,16 +640,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Product ID, serial number, and creator are required" });
       }
 
-      // Check if serial number already exists
-      const existingUnits = await storage.getInventoryUnits();
-      const serialExists = existingUnits.some(unit => unit.serialNumber === serialNumber);
-      if (serialExists) {
-        return res.status(400).json({ message: "Serial number already exists" });
-      }
-
-      // Generate unique unit ID
+      // Generate unique unit ID first
       const unitId = await storage.generateUnitId(productId);
       
+      // Create unit data without checking for duplicates (let database handle unique constraint)
       const unitData = {
         unitId,
         productId,

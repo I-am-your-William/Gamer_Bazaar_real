@@ -113,6 +113,14 @@ export default function AddInventoryUnit() {
         }
         
         // Create inventory unit
+        console.log('Sending data:', {
+          productId: data.productId,
+          serialNumber: data.serialNumber,
+          securityCodeImageUrl,
+          certificateUrl,
+          createdBy: 'admin',
+        });
+        
         const res = await fetch('/api/inventory-units', {
           method: 'POST',
           headers: {
@@ -121,19 +129,21 @@ export default function AddInventoryUnit() {
           body: JSON.stringify({
             productId: data.productId,
             serialNumber: data.serialNumber,
-            securityCodeImageUrl,
-            certificateUrl,
+            securityCodeImageUrl: securityCodeImageUrl || null,
+            certificateUrl: certificateUrl || null,
             createdBy: 'admin',
           }),
           credentials: 'include',
         });
         
+        const responseText = await res.text();
+        console.log('Server response:', responseText);
+        
         if (!res.ok) {
-          const errorText = await res.text();
-          throw new Error(`Server error: ${res.status} - ${errorText}`);
+          throw new Error(`Server error: ${res.status} - ${responseText}`);
         }
         
-        return res.json();
+        return JSON.parse(responseText);
       } catch (error) {
         console.error('Error creating inventory unit:', error);
         throw error;
