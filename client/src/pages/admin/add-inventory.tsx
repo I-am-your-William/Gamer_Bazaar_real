@@ -53,12 +53,15 @@ export default function AddInventory() {
       
       // Upload image if provided
       if (imageFile) {
+        console.log('Uploading file:', imageFile.name, imageFile.type);
         const formData = new FormData();
-        formData.append('image', imageFile);
+        formData.append('image', imageFile); // Must match server expectation
         
-        const uploadRes = await apiRequest('POST', '/api/upload/security-code', formData, {
-          headers: {} // Let browser set content-type for FormData
-        });
+        const uploadRes = await apiRequest('POST', '/api/upload/security-code', formData);
+        if (!uploadRes.ok) {
+          const errorText = await uploadRes.text();
+          throw new Error(`Upload failed: ${errorText}`);
+        }
         const uploadResult = await uploadRes.json();
         securityCodeImageUrl = uploadResult.url;
       }

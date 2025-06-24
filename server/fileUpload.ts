@@ -51,7 +51,9 @@ export function setupFileUpload(app: Express) {
   // Security code image upload endpoint
   app.post('/api/upload/security-code', upload.single('image'), (req, res) => {
     try {
+      console.log('Upload request received, file:', req.file);
       if (!req.file) {
+        console.log('No file in request');
         return res.status(400).json({ message: 'No file uploaded' });
       }
 
