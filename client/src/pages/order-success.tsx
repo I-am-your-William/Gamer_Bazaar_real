@@ -128,7 +128,7 @@ export default function OrderSuccess() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Payment Method:</span>
-                  <span className="capitalize">{order.paymentMethod.replace('-', ' ')}</span>
+                  <span className="capitalize">{order.paymentMethod?.replace('-', ' ') || 'Credit Card'}</span>
                 </div>
               </div>
             </div>
