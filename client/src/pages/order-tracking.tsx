@@ -39,8 +39,9 @@ export default function OrderTracking() {
   const [, navigate] = useLocation();
 
   const { data: order, isLoading, error } = useQuery<Order>({
-    queryKey: ['/api/orders', orderId],
+    queryKey: [`/api/orders/${orderId}`],
     enabled: !!orderId && !!user,
+    retry: 1,
   });
 
   if (!user) {
