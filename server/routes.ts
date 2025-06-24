@@ -630,7 +630,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/inventory-units', async (req, res) => {
     try {
-      const { productId, serialNumber, securityCodeImageUrl, createdBy } = req.body;
+      const { productId, serialNumber, securityCodeImageUrl, certificateUrl, createdBy } = req.body;
       
       console.log('Creating inventory unit:', { productId, serialNumber, createdBy });
       

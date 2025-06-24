@@ -21,7 +21,7 @@ import QRScannerPage from "@/pages/qr-scanner";
 import ProductAuthentication from "@/pages/product-authentication";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminInventory from "@/pages/admin/inventory";
-import AddInventory from "@/pages/admin/add-inventory";
+import AddInventoryUnit from "@/pages/admin/add-inventory-unit";
 import AddProduct from "@/pages/admin/add-product";
 import InventoryUnits from "@/pages/admin/inventory-units";
 import AdminOrders from "@/pages/admin/orders";
