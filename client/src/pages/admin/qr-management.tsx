@@ -4,50 +4,44 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/hooks/useAuth';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import AdminSidebar from '@/components/admin/sidebar';
 import { QrCode, Search, Eye, Download } from 'lucide-react';
 import { queryClient, apiRequest } from '@/lib/queryClient';
-import type { QrCodeWithDetails } from '@/lib/types';
+// Remove type import as it's not defined
 
 export default function AdminQRManagement() {
   const { toast } = useToast();
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAdminLoggedIn } = useAdminAuth();
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-
-    if (!isLoading && user?.role !== 'admin') {
-      toast({
-        title: "Access Denied",
-        description: "Admin access required.",
-        variant: "destructive",
-      });
-      return;
-    }
-  }, [isAuthenticated, isLoading, user, toast]);
+  if (!isAdminLoggedIn) {
+    return (
+      <div className="min-h-screen bg-deep-black flex items-center justify-center text-white">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-4">Access Denied</h1>
+          <p className="text-gray-400">Admin access required</p>
+          <Button 
+            onClick={() => window.location.href = '/admin-login'}
+            className="mt-4 bg-electric hover:bg-electric/80"
+          >
+            Go to Admin Login
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const { data: qrCodes, isLoading: qrLoading } = useQuery({
     queryKey: ['/api/qr-codes'],
-    enabled: isAuthenticated && user?.role === 'admin',
+    enabled: isAdminLoggedIn,
   });
 
   const markAsVerifiedMutation = useMutation({
     mutationFn: async (code: string) => {
-      await apiRequest(`/api/qr-codes/${code}/verify`, {
+      await apiRequest("POST", `/api/verify/${code}`, {
         method: 'POST',
       });
     },
@@ -124,7 +118,7 @@ export default function AdminQRManagement() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-neon-green">
-                  {qrCodes?.filter((qr: QrCodeWithDetails) => qr.isVerified).length || 0}
+                  {qrCodes?.filter((qr: any) => qr.isVerified).length || 0}
                 </div>
               </CardContent>
             </Card>
@@ -134,8 +128,8 @@ export default function AdminQRManagement() {
                 <CardTitle className="text-sm font-medium">Pending</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-gaming-orange">
-                  {qrCodes?.filter((qr: QrCodeWithDetails) => !qr.isVerified).length || 0}
+                <div className="text-2xl font-bold text-yellow-500">
+                  {qrCodes?.filter((qr: any) => !qr.isVerified).length || 0}
                 </div>
               </CardContent>
             </Card>
