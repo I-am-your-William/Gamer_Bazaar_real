@@ -632,7 +632,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { productId, serialNumber, securityCodeImageUrl, certificateUrl, createdBy } = req.body;
       
-      console.log('Creating inventory unit:', { productId, serialNumber, createdBy });
+      console.log('Creating inventory unit:', { productId, serialNumber, securityCodeImageUrl, certificateUrl, createdBy });
       
       // Validate required fields
       if (!productId || !serialNumber || !createdBy) {
@@ -671,7 +671,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error creating inventory unit:", error);
-      res.status(500).json({ message: error.message || "Failed to create inventory unit" });
+      res.status(500).json({ 
+        message: error.message || "Failed to create inventory unit",
+        error: error.toString(),
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      });
     }
   });
 

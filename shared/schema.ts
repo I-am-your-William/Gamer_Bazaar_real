@@ -78,6 +78,7 @@ export const inventoryUnits = pgTable("inventory_units", {
   productId: integer("product_id").references(() => products.id).notNull(),
   serialNumber: varchar("serial_number", { length: 255 }).notNull().unique(),
   securityCodeImageUrl: varchar("security_code_image_url"), // URL to uploaded security code image
+  certificateUrl: varchar("certificate_url"), // URL to uploaded certificate file
   status: varchar("status", { length: 50 }).default("available"), // available, sold, reserved
   soldAt: timestamp("sold_at"),
   orderId: integer("order_id").references(() => orders.id),

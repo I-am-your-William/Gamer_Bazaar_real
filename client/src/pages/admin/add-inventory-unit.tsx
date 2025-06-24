@@ -113,13 +113,25 @@ export default function AddInventoryUnit() {
         }
         
         // Create inventory unit
-        const res = await apiRequest('POST', '/api/inventory-units', {
-          productId: data.productId,
-          serialNumber: data.serialNumber,
-          securityCodeImageUrl,
-          certificateUrl,
-          createdBy: 'admin',
+        const res = await fetch('/api/inventory-units', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            productId: data.productId,
+            serialNumber: data.serialNumber,
+            securityCodeImageUrl,
+            certificateUrl,
+            createdBy: 'admin',
+          }),
+          credentials: 'include',
         });
+        
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(`Server error: ${res.status} - ${errorText}`);
+        }
         
         return res.json();
       } catch (error) {
