@@ -1,209 +1,277 @@
-import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { useLocation } from 'wouter';
+import { useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/hooks/useAuth';
-import { useEffect } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ORDER_STATUSES } from '@/lib/constants';
 import { useToast } from '@/hooks/use-toast';
-import AdminSidebar from '@/components/admin/sidebar';
-import { ShoppingCart, Search, Eye, Package } from 'lucide-react';
-import { queryClient, apiRequest } from '@/lib/queryClient';
-import type { OrderWithItems } from '@/lib/types';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { Package, User, MapPin, Calendar, DollarSign, Search, Filter } from 'lucide-react';
+
+interface Order {
+  id: number;
+  userId: string;
+  status: string;
+  total: string;
+  shippingAddress: string;
+  billingAddress: string;
+  paymentMethod: string;
+  createdAt: string;
+  updatedAt: string;
+  orderItems: Array<{
+    id: number;
+    productId: number;
+    quantity: number;
+    price: string;
+    product: {
+      id: number;
+      name: string;
+      imageUrl?: string;
+    };
+  }>;
+}
 
 export default function AdminOrders() {
+  const { isAdminLoggedIn } = useAdminAuth();
+  const [, navigate] = useLocation();
   const { toast } = useToast();
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const [statusFilter, setStatusFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-
-    if (!isLoading && user?.role !== 'admin') {
-      toast({
-        title: "Access Denied",
-        description: "Admin access required.",
-        variant: "destructive",
-      });
-      return;
-    }
-  }, [isAuthenticated, isLoading, user, toast]);
-
-  const { data: orders, isLoading: ordersLoading } = useQuery({
-    queryKey: ['/api/orders'],
-    enabled: isAuthenticated && user?.role === 'admin',
-  });
-
-  const updateOrderStatusMutation = useMutation({
-    mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
-      await apiRequest(`/api/orders/${orderId}/status`, {
-        method: 'PATCH',
-        body: JSON.stringify({ status }),
-        headers: { 'Content-Type': 'application/json' },
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
-      toast({
-        title: "Success",
-        description: "Order status updated successfully",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to update order status",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const filteredOrders = orders?.filter((order: OrderWithItems) =>
-    order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
-
-  if (isLoading || !user) {
-    return (
-      <div className="min-h-screen bg-deep-black flex items-center justify-center">
-        <div className="animate-spin h-12 w-12 border-4 border-electric border-t-transparent rounded-full"></div>
-      </div>
-    );
+  if (!isAdminLoggedIn) {
+    navigate('/admin');
+    return null;
   }
 
-  if (user.role !== 'admin') {
+  // Fetch all orders (admin can see all orders)
+  const { data: orders = [], isLoading, refetch } = useQuery<Order[]>({
+    queryKey: ['/api/admin/orders'],
+  });
+
+  // Update order status mutation
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
+      const res = await apiRequest('PATCH', `/api/admin/orders/${orderId}/status`, { status });
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/orders'] });
+      toast({
+        title: "Order Updated",
+        description: "Order status has been updated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update order status.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case 'pending': return 'secondary';
+      case 'paid': return 'default';
+      case 'processing': return 'default';
+      case 'shipped': return 'default';
+      case 'delivered': return 'success';
+      case 'cancelled': return 'destructive';
+      default: return 'secondary';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    const statusObj = ORDER_STATUSES.find(s => s.value === status);
+    return statusObj?.label || status;
+  };
+
+  // Filter orders based on status and search term
+  const filteredOrders = orders.filter(order => {
+    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+    const matchesSearch = searchTerm === '' || 
+      order.id.toString().includes(searchTerm) ||
+      order.userId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.shippingAddress.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-deep-black flex items-center justify-center text-white">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">Access Denied</h1>
-          <p className="text-gray-400">Admin access required</p>
+      <div className="p-6">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-muted rounded w-1/4"></div>
+          <div className="h-32 bg-muted rounded"></div>
+          <div className="h-32 bg-muted rounded"></div>
+          <div className="h-32 bg-muted rounded"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-deep-black text-white">
-      <div className="flex">
-        <AdminSidebar />
-        
-        <main className="flex-1 p-8">
-          <div className="mb-8">
-            <h1 className="font-orbitron font-bold text-4xl mb-2">
-              ORDER <span className="text-electric">MANAGEMENT</span>
-            </h1>
-            <p className="text-gray-400">Process and track customer orders</p>
-          </div>
+    <div className="p-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Order Management</h1>
+        <p className="text-muted-foreground">
+          Manage and track all customer orders
+        </p>
+      </div>
 
-          {/* Search Bar */}
-          <div className="relative mb-6">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+      {/* Filters */}
+      <div className="mb-6 flex gap-4 items-center">
+        <div className="flex-1">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search orders by number or email..."
+              placeholder="Search by order ID, user, or address..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-deep-black border-electric text-white"
+              className="pl-10"
             />
           </div>
+        </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-48">
+            <Filter className="h-4 w-4 mr-2" />
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            {ORDER_STATUSES.map((status) => (
+              <SelectItem key={status.value} value={status.value}>
+                {status.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-          {/* Orders List */}
-          <div className="space-y-6">
-            {ordersLoading ? (
-              <div className="flex justify-center py-12">
-                <div className="animate-spin h-12 w-12 border-4 border-electric border-t-transparent rounded-full"></div>
-              </div>
-            ) : filteredOrders.length > 0 ? (
-              filteredOrders.map((order: OrderWithItems) => (
-                <Card key={order.id} className="gaming-card">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-xl">#{order.orderNumber}</CardTitle>
-                        <p className="text-gray-400">{order.customerEmail}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-neon-green text-xl">${order.totalAmount}</p>
-                        <p className="text-sm text-gray-400">
-                          {new Date(order.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between mb-4">
-                      <Badge className={`${
-                        order.status === 'delivered' ? 'bg-neon-green text-deep-black' :
-                        order.status === 'shipped' ? 'bg-gaming-purple text-white' :
-                        order.status === 'processing' ? 'bg-electric text-deep-black' :
-                        'bg-gaming-orange text-white'
-                      }`}>
-                        {order.status}
-                      </Badge>
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="border-electric text-electric hover:bg-electric hover:text-deep-black"
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          View Details
-                        </Button>
-                        {order.status !== 'delivered' && (
-                          <select
-                            value={order.status}
-                            onChange={(e) => updateOrderStatusMutation.mutate({
-                              orderId: order.id,
-                              status: e.target.value
-                            })}
-                            className="bg-deep-black border border-electric text-white px-3 py-1 rounded text-sm"
-                          >
-                            <option value="pending">Pending</option>
-                            <option value="processing">Processing</option>
-                            <option value="shipped">Shipped</option>
-                            <option value="delivered">Delivered</option>
-                          </select>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="border-t border-electric/20 pt-4">
-                      <h4 className="font-semibold mb-2">Order Items</h4>
-                      <div className="space-y-2">
-                        {order.orderItems?.map((item, index) => (
-                          <div key={index} className="flex items-center justify-between text-sm">
-                            <span>{item.productName} x{item.quantity}</span>
-                            <span className="text-neon-green">${item.price}</span>
-                          </div>
+      {/* Orders List */}
+      <div className="space-y-4">
+        {filteredOrders.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-12">
+              <Package className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-xl font-semibold mb-2">No orders found</h3>
+              <p className="text-muted-foreground">
+                {statusFilter !== 'all' || searchTerm 
+                  ? 'No orders match your current filters.' 
+                  : 'No orders have been placed yet.'
+                }
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          filteredOrders.map((order) => (
+            <Card key={order.id} className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-lg">Order #{order.id}</CardTitle>
+                    <CardDescription className="flex items-center gap-4 mt-1">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <User className="h-4 w-4" />
+                        {order.userId}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <DollarSign className="h-4 w-4" />
+                        ${order.total}
+                      </span>
+                    </CardDescription>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Badge variant={getStatusVariant(order.status) as any}>
+                      {getStatusLabel(order.status)}
+                    </Badge>
+                    <Select
+                      value={order.status}
+                      onValueChange={(newStatus) => 
+                        updateOrderStatusMutation.mutate({ orderId: order.id, status: newStatus })
+                      }
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ORDER_STATUSES.map((status) => (
+                          <SelectItem key={status.value} value={status.value}>
+                            {status.label}
+                          </SelectItem>
                         ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Order Items */}
+                  <div>
+                    <h4 className="font-medium mb-3">Items ({order.orderItems.length})</h4>
+                    <div className="space-y-2">
+                      {order.orderItems.map((item) => (
+                        <div key={item.id} className="flex items-center gap-3 text-sm">
+                          <div className="w-10 h-10 bg-muted rounded flex items-center justify-center">
+                            {item.product.imageUrl ? (
+                              <img 
+                                src={item.product.imageUrl} 
+                                alt={item.product.name}
+                                className="w-full h-full object-cover rounded"
+                              />
+                            ) : (
+                              <Package className="h-5 w-5 text-muted-foreground" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-medium">{item.product.name}</p>
+                            <p className="text-muted-foreground">
+                              Qty: {item.quantity} × ${item.price}
+                            </p>
+                          </div>
+                          <p className="font-medium">
+                            ${(parseFloat(item.price) * item.quantity).toFixed(2)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Shipping Information */}
+                  <div>
+                    <h4 className="font-medium mb-3 flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      Shipping Information
+                    </h4>
+                    <div className="text-sm space-y-2">
+                      <div>
+                        <span className="text-muted-foreground">Address:</span>
+                        <p>{order.shippingAddress}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Payment Method:</span>
+                        <p className="capitalize">{order.paymentMethod.replace('-', ' ')}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Last Updated:</span>
+                        <p>{new Date(order.updatedAt).toLocaleString()}</p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <Card className="gaming-card">
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <ShoppingCart className="h-16 w-16 text-gray-600 mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">No Orders Found</h3>
-                  <p className="text-gray-400 text-center">
-                    {searchTerm ? 'No orders match your search criteria.' : 'No orders have been placed yet.'}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </main>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
     </div>
   );

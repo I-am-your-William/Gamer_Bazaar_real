@@ -10,11 +10,12 @@ export const PRODUCT_CATEGORIES = [
 ];
 
 export const ORDER_STATUSES = [
-  { id: 'pending', name: 'Pending', color: 'text-yellow-500' },
-  { id: 'processing', name: 'Processing', color: 'text-blue-500' },
-  { id: 'shipped', name: 'Shipped', color: 'text-purple-500' },
-  { id: 'delivered', name: 'Delivered', color: 'text-green-500' },
-  { id: 'cancelled', name: 'Cancelled', color: 'text-red-500' },
+  { value: 'pending', label: 'Pending Payment', description: 'Order created, awaiting payment confirmation' },
+  { value: 'paid', label: 'Payment Confirmed', description: 'Payment received, preparing for fulfillment' },
+  { value: 'processing', label: 'Processing', description: 'Order is being prepared and packaged' },
+  { value: 'shipped', label: 'Shipped', description: 'Order has been dispatched and is on the way' },
+  { value: 'delivered', label: 'Delivered', description: 'Order has been successfully delivered' },
+  { value: 'cancelled', label: 'Cancelled', description: 'Order has been cancelled' }
 ];
 
 export const PAYMENT_METHODS = [

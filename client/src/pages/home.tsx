@@ -92,9 +92,9 @@ export default function Home() {
                   ) : (
                     <p className="text-gray-400">No orders yet</p>
                   )}
-                  <Link href="/orders">
-                    <Button variant="outline" className="w-full">View All Orders</Button>
-                  </Link>
+                  <Button variant="outline" className="w-full" onClick={() => navigate('/orders')}>
+                    View All Orders
+                  </Button>
                 </div>
               </CardContent>
             </Card>
