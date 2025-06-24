@@ -54,6 +54,10 @@ export default function AddProduct() {
         description: `Product "${data.name}" added successfully`,
       });
       form.reset();
+      // Redirect to inventory to see the new product
+      setTimeout(() => {
+        window.location.href = '/admin/inventory';
+      }, 1500);
     },
     onError: (error: any) => {
       toast({

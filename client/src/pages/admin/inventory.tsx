@@ -19,8 +19,9 @@ export default function AdminInventory() {
   };
 
   const { data: products, isLoading: productsLoading, error } = useQuery<{ products: Product[]; total: number }>({
-    queryKey: ['/api/products'],
-    staleTime: 5 * 60 * 1000,
+    queryKey: ['/api/products', 'admin-inventory'],
+    queryFn: () => fetch('/api/products?limit=50').then(res => res.json()),
+    staleTime: 0, // Force fresh data for admin
   });
 
   console.log('Inventory Debug - Products:', products);
