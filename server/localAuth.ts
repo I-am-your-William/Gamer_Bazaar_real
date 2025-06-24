@@ -193,9 +193,10 @@ export function setupLocalAuth(app: Express) {
 export const isAuthenticated = (req: any, res: any, next: any) => {
   console.log('isAuthenticated check:', {
     isAuthenticated: req.isAuthenticated(),
-    user: req.user,
+    user: req.user ? { id: req.user.id, role: req.user.role } : undefined,
     sessionID: req.sessionID,
-    hasSession: !!req.session
+    hasSession: !!req.session,
+    path: req.path
   });
   
   if (req.isAuthenticated()) {

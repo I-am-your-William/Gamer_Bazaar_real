@@ -50,12 +50,38 @@ export default function AdminOrders() {
   // Fetch all orders (admin can see all orders)
   const { data: orders = [], isLoading, refetch } = useQuery<Order[]>({
     queryKey: ['/api/admin/orders'],
+    queryFn: async () => {
+      const res = await fetch('/api/admin/orders', {
+        credentials: 'include',
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Failed to fetch orders');
+      }
+      
+      return await res.json();
+    },
+    enabled: isAdminLoggedIn,
   });
 
   // Update order status mutation
   const updateOrderStatusMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
-      const res = await apiRequest('PATCH', `/api/admin/orders/${orderId}/status`, { status });
+      const res = await fetch(`/api/admin/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status }),
+        credentials: 'include',
+      });
+      
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Failed to update order status');
+      }
+      
       return await res.json();
     },
     onSuccess: () => {
