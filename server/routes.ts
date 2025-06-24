@@ -635,6 +635,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/inventory-units', async (req, res) => {
     try {
+      // Ensure we always return JSON
+      res.setHeader('Content-Type', 'application/json');
+      
       const { productId, serialNumber, securityCodeImageUrl, certificateUrl, createdBy } = req.body;
       
       console.log('Received request body:', req.body);
@@ -674,7 +677,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error name:", error.name);
       console.error("Error message:", error.message);
       console.error("Error stack:", error.stack);
-      res.status(500).json({ 
+      
+      // Ensure we return JSON even on error
+      res.setHeader('Content-Type', 'application/json');
+      return res.status(500).json({ 
         message: error.message || "Failed to create inventory unit",
         error: error.toString(),
         errorName: error.name,

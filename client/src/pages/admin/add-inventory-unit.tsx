@@ -150,15 +150,23 @@ export default function AddInventoryUnit() {
           credentials: 'include',
         });
         
+        const responseText = await res.text();
+        console.log('Raw server response:', responseText);
+        
         if (!res.ok) {
-          const errorText = await res.text();
-          console.error('Server error response:', errorText);
-          throw new Error(`Server error: ${res.status} - ${errorText}`);
+          console.error('Server error response:', responseText);
+          throw new Error(`Server error: ${res.status} - ${responseText}`);
         }
         
-        const result = await res.json();
-        console.log('Success! Server response:', result);
-        return result;
+        try {
+          const result = JSON.parse(responseText);
+          console.log('Success! Parsed response:', result);
+          return result;
+        } catch (parseError) {
+          console.error('JSON parse error:', parseError);
+          console.error('Response was:', responseText);
+          throw new Error('Invalid server response format');
+        }
       } catch (error) {
         console.error('Error in mutation function:', error);
         throw error;
