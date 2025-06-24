@@ -281,7 +281,10 @@ export default function AdminOrders() {
                     <div className="text-sm space-y-2">
                       <div>
                         <span className="text-muted-foreground">Address:</span>
-                        <p>{order.shippingAddress}</p>
+                        <p>{typeof order.shippingAddress === 'string' 
+                          ? order.shippingAddress 
+                          : `${order.shippingAddress?.address || ''}, ${order.shippingAddress?.city || ''}`}
+                        </p>
                       </div>
                       <div>
                         <span className="text-muted-foreground">Payment Method:</span>
