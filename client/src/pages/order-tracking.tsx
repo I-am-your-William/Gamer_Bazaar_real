@@ -41,7 +41,11 @@ export default function OrderTracking() {
   const { data: order, isLoading, error } = useQuery<Order>({
     queryKey: [`/api/orders/${orderId}`],
     enabled: !!orderId && !!user,
-    retry: 1,
+    retry: (failureCount, error: any) => {
+      // Don't retry on 401/403 errors
+      if (error?.status === 401 || error?.status === 403) return false;
+      return failureCount < 2;
+    },
   });
 
   if (!user) {
