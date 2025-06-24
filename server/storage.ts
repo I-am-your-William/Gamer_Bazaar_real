@@ -134,13 +134,8 @@ export class DatabaseStorage implements IStorage {
   // Category operations
   async getCategories(): Promise<Category[]> {
     try {
-      const result = await Promise.race([
-        db.select().from(categories).orderBy(categories.name),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Database timeout')), 5000)
-        )
-      ]);
-      return result as Category[];
+      const result = await db.select().from(categories).orderBy(categories.name);
+      return result;
     } catch (error) {
       console.error('Error fetching categories:', error);
       throw error;
