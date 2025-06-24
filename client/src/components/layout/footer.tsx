@@ -51,14 +51,14 @@ export default function Footer() {
             <h4 className="font-orbitron font-bold text-lg mb-6">PRODUCTS</h4>
             <ul className="space-y-3 text-gray-400">
               {[
-                { href: '/products', label: 'Gaming PCs' },
-                { href: '/products', label: 'Gaming Laptops' },
-                { href: '/products', label: 'Keyboards & Mice' },
-                { href: '/products', label: 'Headsets' },
-                { href: '/products', label: 'Monitors' },
-                { href: '/products', label: 'Gaming Chairs' },
+                { href: '/products', label: 'Gaming PCs', key: 'gaming-pcs' },
+                { href: '/products', label: 'Gaming Laptops', key: 'gaming-laptops' },
+                { href: '/products', label: 'Keyboards & Mice', key: 'keyboards-mice' },
+                { href: '/products', label: 'Headsets', key: 'headsets' },
+                { href: '/products', label: 'Monitors', key: 'monitors' },
+                { href: '/products', label: 'Gaming Chairs', key: 'gaming-chairs' },
               ].map((item) => (
-                <li key={item.href}>
+                <li key={item.key}>
                   <Link href={item.href}>
                     <span className="hover:text-electric transition-colors cursor-pointer">
                       {item.label}
@@ -74,14 +74,14 @@ export default function Footer() {
             <h4 className="font-orbitron font-bold text-lg mb-6">SUPPORT</h4>
             <ul className="space-y-3 text-gray-400">
               {[
-                { href: '/verify', label: 'Product Verification' },
-                { href: '/qr-scanner', label: 'QR Scanner' },
-                { href: '/orders', label: 'Order Tracking' },
-                { href: '/products', label: 'Browse Products' },
-                { href: '/auth', label: 'Account Login' },
-                { href: '/', label: 'Help Center' },
+                { href: '/verify', label: 'Product Verification', key: 'verify' },
+                { href: '/qr-scanner', label: 'QR Scanner', key: 'qr-scanner' },
+                { href: '/orders', label: 'Order Tracking', key: 'order-tracking' },
+                { href: '/products', label: 'Browse Products', key: 'browse-products' },
+                { href: '/auth', label: 'Account Login', key: 'account-login' },
+                { href: '/', label: 'Help Center', key: 'help-center' },
               ].map((item) => (
-                <li key={item.href}>
+                <li key={item.key}>
                   <Link href={item.href}>
                     <span className="hover:text-electric transition-colors cursor-pointer">
                       {item.label}
