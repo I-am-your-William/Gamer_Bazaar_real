@@ -440,11 +440,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get inventory units for this order to verify serial number
       const inventoryUnits = await storage.getInventoryUnits({ orderId: parseInt(orderId) });
+      console.log('Inventory units for order', orderId, ':', inventoryUnits);
       
       // Check if the serial number matches any unit in this order
       const matchingUnit = inventoryUnits.find(unit => 
-        unit.unitId === serialNumber && unit.status === 'sold'
+        unit.serialNumber === serialNumber && unit.status === 'sold'
       );
+      console.log('Looking for serial number:', serialNumber);
+      console.log('Available units:', inventoryUnits.map(u => ({ unitId: u.unitId, serialNumber: u.serialNumber, status: u.status })));
+      console.log('Matching unit:', matchingUnit);
       
       if (!matchingUnit) {
         return res.status(400).json({ message: "Invalid serial number for this order" });

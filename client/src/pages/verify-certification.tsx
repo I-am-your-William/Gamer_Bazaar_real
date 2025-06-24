@@ -167,12 +167,12 @@ export default function VerifyCertification() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="text-center p-4 bg-electric/10 rounded-lg border border-electric/30">
-              <p className="text-sm text-gray-400 mb-2">Verification Key Format:</p>
+              <p className="text-sm text-gray-400 mb-2">Serial Number Information:</p>
               <div className="font-mono text-lg text-electric">
-                {verificationKey}
+                Enter your product's serial number
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                Replace *** with your product serial number
+                Find this number on your product packaging, device label, or order confirmation email
               </p>
             </div>
 
@@ -193,14 +193,14 @@ export default function VerifyCertification() {
                 </Label>
                 <Input
                   id="serialNumber"
-                  placeholder="Enter serial number from your product"
+                  placeholder="e.g., 1087878787 (numbers only)"
                   value={serialNumber}
                   onChange={(e) => setSerialNumber(e.target.value)}
                   className="bg-gray-800 border-gray-600 text-white"
                   disabled={verifyMutation.isPending}
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Find this number on your product packaging or device
+                  Enter the numeric serial number from your product (no letters or symbols)
                 </p>
               </div>
             </div>
