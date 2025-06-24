@@ -420,12 +420,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin orders endpoint - get all orders
   app.get('/api/admin/orders', async (req: any, res) => {
     try {
+      console.log('Admin orders request:', {
+        isAuthenticated: req.isAuthenticated(),
+        user: req.user,
+        sessionID: req.sessionID,
+        sessionPassport: req.session?.passport
+      });
+      
       // Check if user is authenticated and is admin
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Authentication required" });
       }
       
       const userId = req.user?.id || req.user?.sub;
+      
+      // For admin user, bypass storage lookup if it's the hardcoded admin
+      if (userId === 'admin') {
+        // Get all orders for admin (no userId filter)
+        const orders = await storage.getOrders();
+        return res.json(orders);
+      }
+      
       const user = await storage.getUser(userId);
       
       if (user?.role !== 'admin') {

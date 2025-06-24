@@ -37,8 +37,9 @@ export function setupLocalAuth(app: Express) {
       secure: false, // Set to true in production with HTTPS
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
       sameSite: 'lax', // Allow cross-site requests for Replit
-      httpOnly: true,
+      httpOnly: false, // Allow client-side access for debugging
     },
+    name: 'gamer.session.id', // Custom session name
   };
 
   app.use(session(sessionSettings));
@@ -198,6 +199,7 @@ export const isAuthenticated = (req: any, res: any, next: any) => {
     user: req.user ? { id: req.user.id, role: req.user.role } : undefined,
     sessionID: req.sessionID,
     hasSession: !!req.session,
+    sessionData: req.session,
     path: req.path
   });
   
