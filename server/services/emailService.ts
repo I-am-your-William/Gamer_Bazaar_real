@@ -36,7 +36,7 @@ class EmailService {
       const emailPass = process.env.EMAIL_PASS;
 
       if (emailUser && emailPass) {
-        this.transporter = nodemailer.createTransporter({
+        this.transporter = nodemailer.createTransport({
           service: 'gmail',
           auth: {
             user: emailUser,
