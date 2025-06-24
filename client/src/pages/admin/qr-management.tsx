@@ -41,9 +41,10 @@ export default function AdminQRManagement() {
 
   const markAsVerifiedMutation = useMutation({
     mutationFn: async (code: string) => {
-      await apiRequest("POST", `/api/verify/${code}`, {
-        method: 'POST',
+      const res = await apiRequest("POST", `/api/verify/${code}`, {
+        verifiedAt: new Date().toISOString(),
       });
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/qr-codes'] });
@@ -61,30 +62,16 @@ export default function AdminQRManagement() {
     },
   });
 
-  const filteredQrCodes = qrCodes?.filter((qr: QrCodeWithDetails) =>
-    qr.product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    qr.order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    qr.serialNumber.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
-
-  if (isLoading || !user) {
+  // Filter QR codes based on search term
+  const filteredQrCodes = qrCodes?.filter((qr: any) => {
+    const searchLower = searchTerm.toLowerCase();
     return (
-      <div className="min-h-screen bg-deep-black flex items-center justify-center">
-        <div className="animate-spin h-12 w-12 border-4 border-electric border-t-transparent rounded-full"></div>
-      </div>
+      qr.product?.name?.toLowerCase().includes(searchLower) ||
+      qr.order?.id?.toString().includes(searchLower) ||
+      qr.serialNumber?.toLowerCase().includes(searchLower) ||
+      qr.code?.toLowerCase().includes(searchLower)
     );
-  }
-
-  if (user.role !== 'admin') {
-    return (
-      <div className="min-h-screen bg-deep-black flex items-center justify-center text-white">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">Access Denied</h1>
-          <p className="text-gray-400">Admin access required</p>
-        </div>
-      </div>
-    );
-  }
+  }) || [];
 
   return (
     <div className="min-h-screen bg-deep-black text-white">
@@ -154,16 +141,16 @@ export default function AdminQRManagement() {
               </div>
             ) : filteredQrCodes.length > 0 ? (
               <div className="grid gap-6">
-                {filteredQrCodes.map((qr: QrCodeWithDetails) => (
+                {filteredQrCodes.map((qr: any) => (
                   <Card key={qr.id} className="gaming-card">
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <div>
-                          <CardTitle className="text-lg">{qr.product.name}</CardTitle>
-                          <p className="text-gray-400">Order #{qr.order.orderNumber}</p>
+                          <CardTitle className="text-lg">{qr.product?.name || 'Unknown Product'}</CardTitle>
+                          <p className="text-gray-400">Order #{qr.order?.id || qr.orderId}</p>
                         </div>
                         <Badge className={
-                          qr.isVerified ? 'bg-neon-green text-deep-black' : 'bg-gaming-orange text-white'
+                          qr.isVerified ? 'bg-green-500 text-white' : 'bg-yellow-500 text-black'
                         }>
                           {qr.isVerified ? 'Verified' : 'Pending'}
                         </Badge>
@@ -191,6 +178,7 @@ export default function AdminQRManagement() {
                         <Button 
                           variant="outline" 
                           size="sm"
+                          onClick={() => window.open(`/authenticate/${qr.code}`, '_blank')}
                           className="border-electric text-electric hover:bg-electric hover:text-deep-black"
                         >
                           <Eye className="h-4 w-4 mr-1" />
