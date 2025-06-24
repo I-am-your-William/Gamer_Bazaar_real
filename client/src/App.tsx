@@ -18,6 +18,7 @@ import QRScannerPage from "@/pages/qr-scanner";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminInventory from "@/pages/admin/inventory";
 import AddInventory from "@/pages/admin/add-inventory";
+import AddProduct from "@/pages/admin/add-product";
 import InventoryUnits from "@/pages/admin/inventory-units";
 import AdminOrders from "@/pages/admin/orders";
 import AdminQRManagement from "@/pages/admin/qr-management";
@@ -47,6 +48,7 @@ function Router() {
         <Route path="/admin" component={AdminDashboard} />
         <Route path="/admin/inventory" component={AdminInventory} />
         <Route path="/admin/add-inventory" component={AddInventory} />
+        <Route path="/admin/add-product" component={AddProduct} />
         <Route path="/admin/inventory-units" component={InventoryUnits} />
         <Route path="/admin/orders" component={AdminOrders} />
         <Route path="/admin/qr-management" component={AdminQRManagement} />
