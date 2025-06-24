@@ -66,6 +66,10 @@ export default function Checkout() {
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
       const res = await apiRequest('POST', '/api/orders', orderData);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Failed to create order');
+      }
       return await res.json();
     },
     onSuccess: (order) => {
@@ -74,13 +78,19 @@ export default function Checkout() {
       queryClient.invalidateQueries({ queryKey: ['/api/cart'] });
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      
       toast({
         title: "Order Placed Successfully!",
-        description: `Order #${order.id} has been created. You will receive a confirmation email shortly.`,
+        description: `Order #${order.orderNumber || order.id} has been created. You will receive a confirmation email shortly.`,
       });
-      navigate(`/order-success/${order.id}`);
+      
+      // Add a small delay to ensure state updates
+      setTimeout(() => {
+        navigate(`/order-success/${order.id}`);
+      }, 100);
     },
     onError: (error: any) => {
+      console.error('Order creation error:', error);
       toast({
         title: "Order Failed",
         description: error.message || "Failed to place order. Please try again.",
