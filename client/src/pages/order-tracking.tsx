@@ -286,6 +286,54 @@ export default function OrderTracking() {
               </CardContent>
             </Card>
           )}
+
+          {/* Product Certification Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                Product Certification
+              </CardTitle>
+              <CardDescription>
+                Verify your product authenticity
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center space-y-4">
+                <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
+                  <div className="w-32 h-32 mx-auto mb-3 bg-white p-2 rounded-lg">
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(
+                        `${window.location.origin}/verify-certification/${order.id}`
+                      )}`}
+                      alt="Certification QR Code"
+                      className="w-full h-full"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Scan to verify product authenticity
+                  </p>
+                  <a
+                    href={`/verify-certification/${order.id}`}
+                    className="text-xs text-blue-600 hover:text-blue-800 underline break-all"
+                  >
+                    {window.location.origin}/verify-certification/{order.id}
+                  </a>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Use this QR code to verify your product's authenticity and receive certification
+                </p>
+                <Button
+                  onClick={() => navigate(`/verify-certification/${order.id}`)}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Shield className="h-4 w-4 mr-2" />
+                  Verify Product Now
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

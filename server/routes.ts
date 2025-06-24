@@ -417,6 +417,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Product certification verification
+  app.post('/api/verify-certification', isAuthenticated, async (req: any, res) => {
+    try {
+      const { orderId, serialNumber } = req.body;
+      
+      if (!orderId || !serialNumber) {
+        return res.status(400).json({ message: "Order ID and serial number are required" });
+      }
+      
+      const userId = req.user?.id || req.user?.sub;
+      const order = await storage.getOrder(parseInt(orderId));
+      
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      // Check if user owns the order
+      if (order.userId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      // Get inventory units for this order to verify serial number
+      const inventoryUnits = await storage.getInventoryUnits({ orderId: parseInt(orderId) });
+      
+      // Check if the serial number matches any unit in this order
+      const matchingUnit = inventoryUnits.find(unit => 
+        unit.unitId === serialNumber && unit.status === 'sold'
+      );
+      
+      if (!matchingUnit) {
+        return res.status(400).json({ message: "Invalid serial number for this order" });
+      }
+      
+      // Get product details
+      const product = await storage.getProduct(matchingUnit.productId);
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      
+      // Get user details for email
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Send certification email
+      try {
+        await emailService.sendCertificationConfirmation(
+          user.email,
+          user.firstName || user.username,
+          {
+            productName: product.name,
+            serialNumber: serialNumber,
+            orderNumber: order.orderNumber || order.id.toString(),
+            certificationDate: new Date().toLocaleDateString()
+          }
+        );
+        console.log('✅ Certification email sent to', user.email);
+      } catch (emailError) {
+        console.error('Failed to send certification email:', emailError);
+        // Don't fail the verification if email fails
+      }
+      
+      res.json({
+        success: true,
+        productName: product.name,
+        orderNumber: order.orderNumber || order.id.toString(),
+        message: "Product certification verified successfully"
+      });
+      
+    } catch (error) {
+      console.error('Certification verification error:', error);
+      res.status(500).json({ message: "Internal server error during verification" });
+    }
+  });
+
   // Admin orders endpoint - get all orders
   app.get('/api/admin/orders', async (req: any, res) => {
     try {

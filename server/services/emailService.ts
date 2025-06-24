@@ -256,6 +256,117 @@ class EmailService {
     console.log(`📫 To: ${email}`);
     console.log(`🎮 Welcome to Gamer Bazaar newsletter!`);
   }
+
+  async sendCertificationConfirmation(
+    email: string, 
+    customerName: string, 
+    certificationData: {
+      productName: string;
+      serialNumber: string;
+      orderNumber: string;
+      certificationDate: string;
+    }
+  ): Promise<void> {
+    if (!this.transporter) {
+      console.log(`Mock certification email for: ${email}`);
+      console.log(`Product: ${certificationData.productName} (S/N: ${certificationData.serialNumber})`);
+      return;
+    }
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: `Product Certification Confirmed - ${certificationData.productName}`,
+      html: this.generateCertificationEmailHTML(customerName, certificationData)
+    };
+
+    await this.transporter.sendMail(mailOptions);
+  }
+
+  private generateCertificationEmailHTML(customerName: string, data: {
+    productName: string;
+    serialNumber: string;
+    orderNumber: string;
+    certificationDate: string;
+  }): string {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #00f5ff, #00ff88); padding: 30px; text-align: center; color: white; }
+          .content { padding: 30px; background: #f9f9f9; }
+          .cert-box { background: white; border: 3px solid #00ff88; padding: 25px; margin: 20px 0; border-radius: 10px; text-align: center; }
+          .verified { color: #00ff88; font-size: 24px; font-weight: bold; margin: 10px 0; }
+          .details { background: white; padding: 20px; border-radius: 8px; margin: 15px 0; }
+          .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🛡️ PRODUCT CERTIFICATION</h1>
+            <h2>Gamers Bazaar</h2>
+          </div>
+          
+          <div class="content">
+            <p>Dear ${customerName},</p>
+            
+            <div class="cert-box">
+              <div class="verified">✅ PRODUCT CERTIFIED</div>
+              <h3>This product has been certified by seller</h3>
+              <p><strong>${data.productName}</strong></p>
+            </div>
+            
+            <div class="details">
+              <h4>Certification Details:</h4>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr style="border-bottom: 1px solid #eee;">
+                  <td style="padding: 10px; font-weight: bold;">Product:</td>
+                  <td style="padding: 10px;">${data.productName}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                  <td style="padding: 10px; font-weight: bold;">Serial Number:</td>
+                  <td style="padding: 10px; font-family: monospace;">${data.serialNumber}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #eee;">
+                  <td style="padding: 10px; font-weight: bold;">Order Number:</td>
+                  <td style="padding: 10px;">#${data.orderNumber}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px; font-weight: bold;">Certification Date:</td>
+                  <td style="padding: 10px;">${data.certificationDate}</td>
+                </tr>
+              </table>
+            </div>
+            
+            <p>Your product has been successfully verified and is certified as authentic. This certification confirms:</p>
+            <ul>
+              <li>✅ Product authenticity verified</li>
+              <li>✅ Serial number validated</li>
+              <li>✅ Genuine product from authorized seller</li>
+              <li>✅ Full warranty coverage active</li>
+            </ul>
+            
+            <p>Keep this email as proof of certification for warranty claims and support.</p>
+            
+            <p>Thank you for choosing Gamers Bazaar!</p>
+            
+            <p>Best regards,<br>
+            <strong>Gamers Bazaar Certification Team</strong></p>
+          </div>
+          
+          <div class="footer">
+            <p>© 2024 Gamers Bazaar. All rights reserved.<br>
+            This is an automated certification email. Please do not reply.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
 }
 
 export const emailService = new EmailService();
