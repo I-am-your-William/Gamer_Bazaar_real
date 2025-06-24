@@ -571,13 +571,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createInventoryUnit(unit: InsertInventoryUnit): Promise<InventoryUnit> {
-    const [newUnit] = await db.insert(inventoryUnits).values(unit).returning();
-    
-    // Update product stock quantity by counting available units
-    const availableCount = await this.getAvailableInventoryCount(unit.productId);
-    await this.updateProduct(unit.productId, { stockQuantity: availableCount });
-    
-    return newUnit;
+    console.log('Creating inventory unit in storage:', unit);
+    try {
+      const [newUnit] = await db.insert(inventoryUnits).values(unit).returning();
+      console.log('Successfully created unit:', newUnit);
+      
+      // Update product stock quantity by counting available units
+      const availableCount = await this.getAvailableInventoryCount(unit.productId);
+      await this.updateProduct(unit.productId, { stockQuantity: availableCount });
+      
+      return newUnit;
+    } catch (error) {
+      console.error('Database error creating inventory unit:', error);
+      throw error;
+    }
   }
 
   async updateInventoryUnitStatus(unitId: string, status: string, orderId?: number): Promise<InventoryUnit> {
