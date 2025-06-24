@@ -83,6 +83,7 @@ export function setupLocalAuth(app: Express) {
   
   passport.deserializeUser(async (id: string, done) => {
     try {
+      console.log('Deserializing user with ID:', id);
       if (id === 'admin') {
         const adminUser = {
           id: 'admin',
@@ -93,12 +94,15 @@ export function setupLocalAuth(app: Express) {
           createdAt: new Date(),
           updatedAt: new Date(),
         };
+        console.log('Deserializing admin user:', adminUser);
         return done(null, adminUser);
       }
       
       const user = await storage.getUser(id);
+      console.log('Deserializing regular user:', user);
       done(null, user);
     } catch (error) {
+      console.error('Error deserializing user:', error);
       done(error);
     }
   });
@@ -187,6 +191,13 @@ export function setupLocalAuth(app: Express) {
 
 // Middleware to check if user is authenticated
 export const isAuthenticated = (req: any, res: any, next: any) => {
+  console.log('isAuthenticated check:', {
+    isAuthenticated: req.isAuthenticated(),
+    user: req.user,
+    sessionID: req.sessionID,
+    hasSession: !!req.session
+  });
+  
   if (req.isAuthenticated()) {
     return next();
   }
