@@ -424,11 +424,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isAuthenticated: req.isAuthenticated(),
         user: req.user,
         sessionID: req.sessionID,
-        sessionPassport: req.session?.passport
+        sessionPassport: req.session?.passport,
+        headers: req.headers.authorization
       });
       
       // Check if user is authenticated and is admin
       if (!req.isAuthenticated()) {
+        console.log('Authentication failed - checking session manually');
+        
+        // Manual session check for admin - workaround for session deserialization issue
+        if (req.session?.passport?.user === 'admin') {
+          console.log('Found admin in session manually, proceeding...');
+          const orders = await storage.getOrders();
+          return res.json(orders);
+        }
+        
         return res.status(401).json({ message: "Authentication required" });
       }
       

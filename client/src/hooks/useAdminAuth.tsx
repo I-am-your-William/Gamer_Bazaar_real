@@ -26,7 +26,14 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
 
   const adminLogout = () => {
     localStorage.removeItem('admin_logged_in');
+    localStorage.removeItem('admin_session_user');
     setIsAdminLoggedIn(false);
+    
+    // Also logout from server session
+    fetch('/api/logout', {
+      method: 'POST',
+      credentials: 'include',
+    }).catch(console.error);
   };
 
   return (

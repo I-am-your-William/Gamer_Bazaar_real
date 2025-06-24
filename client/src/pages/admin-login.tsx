@@ -63,6 +63,9 @@ export default function AdminLogin() {
         throw new Error('Admin access required');
       }
       
+      // Store admin session info for frontend use
+      localStorage.setItem('admin_session_user', JSON.stringify(result));
+      
       return result;
     },
     onSuccess: () => {
