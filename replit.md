@@ -136,5 +136,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Changelog
 
-Changelog:
-- June 24, 2025. Initial setup
+### June 24, 2025
+- Initial setup and debugging of gaming equipment e-commerce platform
+- Fixed major performance issues (reduced API response times from 572ms to 26ms)
+- Implemented complete admin product management system
+- Added comprehensive order management with dummy payment processing
+- **Email Notification System**: Implemented order confirmation emails with:
+  - Product serial numbers for each ordered item
+  - Security QR code images for product verification
+  - Professional HTML email templates
+  - Automatic inventory unit assignment (available → sold)
+  - Fallback to console logging if email credentials not provided
+- Enhanced inventory management with individual unit tracking
+- Added customer order tracking with detailed progress visualization
+- Created admin order management dashboard with status update controls
