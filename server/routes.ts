@@ -417,7 +417,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/orders/:id/status', isAuthenticated, async (req: any, res) => {
+  // Admin orders endpoint - get all orders
+  app.get('/api/admin/orders', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.id || req.user?.sub;
+      const user = await storage.getUser(userId);
+      
+      if (user?.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      // Get all orders for admin (no userId filter)
+      const orders = await storage.getOrders();
+      res.json(orders);
+    } catch (error) {
+      console.error("Error fetching admin orders:", error);
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  app.patch('/api/admin/orders/:id/status', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.id || req.user?.sub;
       const user = await storage.getUser(userId);
