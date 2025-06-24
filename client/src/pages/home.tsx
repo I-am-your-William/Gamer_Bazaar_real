@@ -1,4 +1,4 @@
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 
 export default function Home() {
   const { user } = useAuth();
+  const [location, navigate] = useLocation();
 
   const { data: productsData } = useQuery({
     queryKey: ['/api/products', { limit: 8 }],
