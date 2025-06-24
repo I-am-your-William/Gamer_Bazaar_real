@@ -17,8 +17,8 @@ interface Order {
   userId: string;
   status: string;
   total: string;
-  shippingAddress: string;
-  billingAddress: string;
+  shippingAddress: string | { address: string; city: string };
+  billingAddress: string | { address: string; city: string };
   paymentMethod: string;
   createdAt: string;
   updatedAt: string;
