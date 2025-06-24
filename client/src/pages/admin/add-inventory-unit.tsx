@@ -25,9 +25,14 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function AddInventoryUnit() {
   const { toast } = useToast();
-  const { isAdminLoggedIn } = useAdminAuth();
+  const { isAdminLoggedIn, adminLogout } = useAdminAuth();
   const [securityImagePreview, setSecurityImagePreview] = useState<string | null>(null);
   const [certificateFileName, setCertificateFileName] = useState<string>('');
+
+  const handleLogout = () => {
+    adminLogout();
+    window.location.href = '/';
+  };
 
   if (!isAdminLoggedIn) {
     return (
@@ -263,14 +268,24 @@ export default function AddInventoryUnit() {
     <div className="min-h-screen bg-deep-black text-white p-8">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
-          <Button 
-            variant="outline" 
-            onClick={() => window.location.href = '/admin/inventory'}
-            className="text-white border-gray-600 hover:bg-gray-700 mb-4"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Inventory
-          </Button>
+          <div className="flex justify-between items-center mb-4">
+            <Button 
+              variant="outline" 
+              onClick={() => window.location.href = '/admin/inventory'}
+              className="text-white border-gray-600 hover:bg-gray-700"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Inventory
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              onClick={handleLogout}
+              className="text-white border-red-600 hover:bg-red-700"
+            >
+              Logout & Return to Main Page
+            </Button>
+          </div>
           
           <h1 className="font-orbitron font-bold text-4xl mb-2">
             ADD INVENTORY <span className="text-electric">UNIT</span>
