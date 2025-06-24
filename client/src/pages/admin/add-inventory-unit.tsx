@@ -165,26 +165,39 @@ export default function AddInventoryUnit() {
       }
     },
     onSuccess: (data) => {
-      console.log('Mutation success with data:', data);
+      console.log('SUCCESS! Mutation completed with data:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/inventory-units'] });
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
-      toast({
-        title: "Success", 
-        description: data.message || `Inventory unit ${data.unitId} added successfully`,
-      });
+      
+      // Force toast to show
+      setTimeout(() => {
+        toast({
+          title: "✅ Success!", 
+          description: data.message || `Inventory unit ${data.unitId} added successfully`,
+          variant: "default",
+        });
+      }, 100);
+      
       form.reset();
       setSecurityImagePreview(null);
       setCertificateFileName('');
     },
     onError: (error: any) => {
-      console.error('Full error object:', error);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to add inventory unit",
-        variant: "destructive",
+      console.error('❌ MUTATION ERROR:', error);
+      console.error('Error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
       });
+      
+      // Force error toast to show
+      setTimeout(() => {
+        toast({
+          title: "❌ Error",
+          description: error.message || "Failed to add inventory unit",
+          variant: "destructive",
+        });
+      }, 100);
     },
   });
 
