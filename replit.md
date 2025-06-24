@@ -133,6 +133,7 @@ Gamer Bazaar is a comprehensive e-commerce platform designed specifically for ga
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Admin logout preference: User wants quick, reliable logout that immediately redirects to main page without loading delays.
 
 ## Changelog
 
