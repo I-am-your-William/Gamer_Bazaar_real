@@ -58,7 +58,7 @@ export default function AdminInventory() {
           <div className="flex gap-4">
             <Button 
               onClick={() => window.location.href = '/admin/add-product'}
-              className="bg-gaming-blue hover:bg-gaming-blue/80"
+              className="bg-green-500 hover:bg-green-600 text-white"
             >
               <Package className="w-4 h-4 mr-2" />
               Add New Product
