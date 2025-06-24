@@ -370,10 +370,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Clear cart
       await storage.clearCart(userId);
       
-      // Send confirmation email
+      // Send confirmation email with serial numbers and security codes
       const user = await storage.getUser(userId);
       if (user?.email) {
-        await emailService.sendOrderConfirmation(user.email, order, orderItemsData);
+        // Get inventory units with serial numbers for each ordered item
+        const enhancedOrderItems = await Promise.all(
+          orderItemsData.map(async (item: any) => {
+            // Get available inventory units for this product
+            const inventoryUnits = await storage.getInventoryUnits({ 
+              productId: item.productId, 
+              status: 'available' 
+            });
+            
+            let serialNumber = '';
+            let securityCodeImage = '';
+            
+            // Assign inventory units to this order (first available)
+            if (inventoryUnits.length > 0) {
+              const unitToAssign = inventoryUnits[0];
+              serialNumber = unitToAssign.serialNumber;
+              securityCodeImage = unitToAssign.securityCodeImageUrl || '';
+              
+              // Update inventory unit status to 'sold'
+              await storage.updateInventoryUnitStatus(unitToAssign.unitId, 'sold', order.id);
+            }
+
+            return {
+              ...item,
+              serialNumber,
+              securityCodeImage
+            };
+          })
+        );
+
+        await emailService.sendOrderConfirmation(user.email, order, enhancedOrderItems);
       }
       
       res.json(order);
