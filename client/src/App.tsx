@@ -17,6 +17,7 @@ import Orders from "@/pages/orders";
 import OrderTracking from "@/pages/order-tracking";
 import OrderSuccess from "@/pages/order-success";
 import Verify from "@/pages/verify";
+import VerifyCertification from "@/pages/verify-certification";
 import QRScannerPage from "@/pages/qr-scanner";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminInventory from "@/pages/admin/inventory";
@@ -86,6 +87,7 @@ function Router() {
           <Route path="/orders/:id" component={OrderTracking} />
           <Route path="/order-success/:id" component={OrderSuccess} />
           <Route path="/verify/:code" component={Verify} />
+          <Route path="/verify-certification/:orderId" component={VerifyCertification} />
           <Route path="/qr-scanner" component={QRScannerPage} />
           <Route path="/admin-login" component={AdminLogin} />
           <Route path="/auth" component={AuthPage} />

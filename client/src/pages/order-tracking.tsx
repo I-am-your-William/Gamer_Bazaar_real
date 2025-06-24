@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { ORDER_STATUSES } from '@/lib/constants';
-import { CheckCircle, Circle, Package, Truck, MapPin, Clock, ArrowLeft } from 'lucide-react';
+import { CheckCircle, Circle, Package, Truck, MapPin, Clock, ArrowLeft, Shield } from 'lucide-react';
 import { useLocation } from 'wouter';
 
 interface Order {
