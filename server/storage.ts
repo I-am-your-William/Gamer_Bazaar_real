@@ -75,7 +75,6 @@ export interface IStorage {
   getQrCode(code: string): Promise<(QrCode & { product: Product; order: Order; user: User }) | undefined>;
   createQrCode(qrCode: InsertQrCode): Promise<QrCode>;
   verifyQrCode(code: string, verificationData?: any): Promise<QrCode>;
-  deactivateQrCode(code: string): Promise<QrCode>;
 
   // Analytics
   getSalesAnalytics(): Promise<{
@@ -133,13 +132,7 @@ export class DatabaseStorage implements IStorage {
 
   // Category operations
   async getCategories(): Promise<Category[]> {
-    try {
-      const result = await db.select().from(categories).orderBy(categories.name);
-      return result;
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      throw error;
-    }
+    return await db.select().from(categories).orderBy(categories.name);
   }
 
   async createCategory(category: InsertCategory): Promise<Category> {
@@ -470,22 +463,6 @@ export class DatabaseStorage implements IStorage {
     return verifiedQrCode;
   }
 
-  async deactivateQrCode(code: string): Promise<QrCode> {
-    const [qrCode] = await db
-      .update(qrCodes)
-      .set({
-        isActive: false,
-      })
-      .where(eq(qrCodes.code, code))
-      .returning();
-
-    if (!qrCode) {
-      throw new Error("QR code not found");
-    }
-
-    return qrCode;
-  }
-
   // Analytics
   async getSalesAnalytics(): Promise<{
     todaySales: number;
@@ -577,20 +554,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createInventoryUnit(unit: InsertInventoryUnit): Promise<InventoryUnit> {
-    console.log('Creating inventory unit in storage:', unit);
-    try {
-      const [newUnit] = await db.insert(inventoryUnits).values(unit).returning();
-      console.log('Successfully created unit:', newUnit);
-      
-      // Update product stock quantity by counting available units
-      const availableCount = await this.getAvailableInventoryCount(unit.productId);
-      await this.updateProduct(unit.productId, { stockQuantity: availableCount });
-      
-      return newUnit;
-    } catch (error) {
-      console.error('Database error creating inventory unit:', error);
-      throw error;
-    }
+    const [newUnit] = await db.insert(inventoryUnits).values(unit).returning();
+    
+    // Update product stock quantity by counting available units
+    const availableCount = await this.getAvailableInventoryCount(unit.productId);
+    await this.updateProduct(unit.productId, { stockQuantity: availableCount });
+    
+    return newUnit;
   }
 
   async updateInventoryUnitStatus(unitId: string, status: string, orderId?: number): Promise<InventoryUnit> {

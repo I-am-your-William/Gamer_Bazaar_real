@@ -133,7 +133,6 @@ Gamer Bazaar is a comprehensive e-commerce platform designed specifically for ga
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
-Admin logout preference: User wants quick, reliable logout that immediately redirects to main page without loading delays.
 
 ## Changelog
 
@@ -159,10 +158,5 @@ Admin logout preference: User wants quick, reliable logout that immediately redi
   - Updated inventory button styling to light blue as requested
   - Updated inventory page buttons: "Add Unit" buttons changed to green, "Add New Product" button prominently displayed
   - **Fixed Footer 404 Errors**: Updated footer links to point to existing pages instead of undefined routes that were causing 404 errors at bottom of homepage
-- **QR Code Generation System**: Implemented comprehensive QR code system with:
-  - Automatic QR code generation when orders are placed
-  - QR codes visible to both admin and users until product delivery
-  - Product authentication page showing product details and certificates
-  - Certificate upload functionality in inventory unit creation
-  - QR code deactivation when orders are marked as delivered
-  - Clear separation between active and inactive QR codes
+  - **Fixed Order Details Navigation**: Resolved "View Details" button functionality and navigation import issues in home page
+  - **Enhanced Order Tracking**: Improved error handling and authentication retry logic for individual order viewing
