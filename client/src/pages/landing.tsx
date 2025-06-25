@@ -55,9 +55,9 @@ export default function Landing() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                   className="bg-gradient-to-r from-electric to-neon-green text-deep-black px-8 py-4 rounded-full font-bold text-lg hover:shadow-neon-glow transition-all duration-300 animate-glow"
-                  onClick={() => window.location.href = '/api/login'}
+                  onClick={() => window.location.href = '/auth'}
                 >
-                  SIGN IN WITH GOOGLE
+                  SIGN IN
                 </Button>
                 <Link href="/products">
                   <Button 

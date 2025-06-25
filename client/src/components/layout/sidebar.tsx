@@ -157,18 +157,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   </Button>
                 </Link>
 
-                {user?.role === 'admin' && (
-                  <Link href="/admin">
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start text-white hover:bg-gaming-purple hover:text-white"
-                      onClick={onClose}
-                    >
-                      <TrendingUp className="h-5 w-5 mr-3" />
-                      Admin Panel
-                    </Button>
-                  </Link>
-                )}
+
               </>
             )}
           </div>
@@ -236,19 +225,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               <>
                 <Button 
                   onClick={() => {
-                    window.location.assign('/api/login');
+                    window.location.assign('/auth');
                   }}
                   className="w-full bg-electric text-deep-black hover:bg-electric/80"
                 >
                   Sign In
                 </Button>
-                <Button 
-                  onClick={() => window.location.href = '/admin-login'}
-                  variant="outline"
-                  className="w-full border-gaming-orange text-gaming-orange hover:bg-gaming-orange hover:text-white"
-                >
-                  Admin Login
-                </Button>
+
               </>
             ) : (
               <Button 
