@@ -84,6 +84,9 @@ export interface IStorage {
     totalProducts: number;
   }>;
 
+  // User management
+  getAllUsers(): Promise<User[]>;
+
   // Inventory Units operations
   getInventoryUnits(filters?: { productId?: number; status?: string }): Promise<(InventoryUnit & { product: Product })[]>;
   getInventoryUnit(unitId: string): Promise<(InventoryUnit & { product: Product }) | undefined>;
