@@ -147,9 +147,6 @@ export default function AuthPage() {
                       {loginMutation.isPending ? 'Logging in...' : 'Login'}
                     </Button>
                   </form>
-                  <div className="text-center text-sm text-gray-400 mt-4">
-                    <p>Admin access: username: <code className="bg-gray-700 px-1 rounded">admin</code>, password: <code className="bg-gray-700 px-1 rounded">1234</code></p>
-                  </div>
                 </TabsContent>
 
                 <TabsContent value="register" className="space-y-4">

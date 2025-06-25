@@ -53,12 +53,13 @@ export default function Landing() {
                 Every product comes with a unique digital certificate for guaranteed authenticity.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  className="bg-gradient-to-r from-electric to-neon-green text-deep-black px-8 py-4 rounded-full font-bold text-lg hover:shadow-neon-glow transition-all duration-300 animate-glow"
-                  onClick={() => window.location.href = '/api/login'}
-                >
-                  SIGN IN WITH GOOGLE
-                </Button>
+                <Link href="/auth">
+                  <Button 
+                    className="bg-gradient-to-r from-electric to-neon-green text-deep-black px-8 py-4 rounded-full font-bold text-lg hover:shadow-neon-glow transition-all duration-300 animate-glow"
+                  >
+                    SIGN IN WITH GOOGLE
+                  </Button>
+                </Link>
                 <Link href="/products">
                   <Button 
                     variant="outline" 
