@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLocalAuth } from '@/hooks/useLocalAuth';
 import { useLocation } from 'wouter';
+import { Check, X } from 'lucide-react';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
@@ -18,7 +19,11 @@ const loginSchema = z.object({
 const registerSchema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters'),
   email: z.string().email('Invalid email address'),
-  password: z.string().min(4, 'Password must be at least 4 characters'),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .regex(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special symbol'),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
 });
@@ -30,6 +35,27 @@ export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useLocalAuth();
   const [activeTab, setActiveTab] = useState('login');
   const [, setLocation] = useLocation();
+  const [passwordValue, setPasswordValue] = useState('');
+
+  // Password strength validation helpers
+  const passwordRequirements = [
+    { 
+      label: 'At least 8 characters', 
+      test: (pwd: string) => pwd.length >= 8 
+    },
+    { 
+      label: 'One uppercase letter', 
+      test: (pwd: string) => /[A-Z]/.test(pwd) 
+    },
+    { 
+      label: 'One lowercase letter', 
+      test: (pwd: string) => /[a-z]/.test(pwd) 
+    },
+    { 
+      label: 'One special symbol (!@#$%^&*)', 
+      test: (pwd: string) => /[!@#$%^&*(),.?":{}|<>]/.test(pwd) 
+    }
+  ];
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -208,9 +234,29 @@ export default function AuthPage() {
                         {...registerForm.register('password')}
                         className="bg-gray-800 border-gray-600 text-white"
                         placeholder="Choose a password"
+                        onChange={(e) => {
+                          registerForm.setValue('password', e.target.value);
+                          setPasswordValue(e.target.value);
+                        }}
                       />
+                      {/* Password Requirements */}
+                      <div className="mt-3 space-y-2">
+                        <p className="text-sm text-gray-400 mb-2">Password must contain:</p>
+                        {passwordRequirements.map((req, index) => (
+                          <div key={index} className="flex items-center gap-2 text-sm">
+                            {req.test(passwordValue) ? (
+                              <Check className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <X className="h-4 w-4 text-red-500" />
+                            )}
+                            <span className={req.test(passwordValue) ? 'text-green-500' : 'text-gray-400'}>
+                              {req.label}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                       {registerForm.formState.errors.password && (
-                        <p className="text-red-400 text-sm mt-1">
+                        <p className="text-red-400 text-sm mt-2">
                           {registerForm.formState.errors.password.message}
                         </p>
                       )}
