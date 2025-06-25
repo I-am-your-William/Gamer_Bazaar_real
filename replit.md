@@ -164,3 +164,4 @@ Preferred communication style: Simple, everyday language.
   - **Security Enhancement**: Removed admin credentials display from login page to prevent unauthorized access
   - **Navigation Fix**: Updated Google sign-in button to redirect to auth page instead of API endpoint
   - **UI Cleanup**: Removed Sign In button from sidebar panel for cleaner interface
+  - **Dashboard Cleanup**: Removed QR Verifications panel and Scan QR Code button from user dashboard

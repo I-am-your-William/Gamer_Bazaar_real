@@ -63,7 +63,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <h2 className="font-orbitron font-bold text-3xl mb-8 text-center">Your Gaming Dashboard</h2>
           
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
+          <div className="grid md:grid-cols-2 gap-6 mb-12">
             <Card className="gaming-card">
               <CardHeader>
                 <CardTitle className="flex items-center text-electric">
@@ -100,36 +100,7 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            <Card className="gaming-card">
-              <CardHeader>
-                <CardTitle className="flex items-center text-neon-green">
-                  <span className="mr-2">🔍</span>
-                  QR Verifications
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentQrCodes.length > 0 ? (
-                    recentQrCodes.map((qr: any) => (
-                      <div key={qr.id} className="flex justify-between items-center p-3 bg-deep-black rounded-lg">
-                        <div>
-                          <p className="font-semibold text-sm">{qr.product.name}</p>
-                          <p className="text-xs text-gray-400">{qr.serialNumber}</p>
-                        </div>
-                        <Badge className={qr.isVerified ? 'bg-neon-green text-deep-black' : 'bg-gaming-orange text-white'}>
-                          {qr.isVerified ? 'Verified' : 'Pending'}
-                        </Badge>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-400">No QR codes yet</p>
-                  )}
-                  <Link href="/verify">
-                    <Button variant="outline" className="w-full">Verify Product</Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
+
 
             <Card className="gaming-card">
               <CardHeader>
@@ -152,12 +123,7 @@ export default function Home() {
                       Gaming Accessories
                     </Button>
                   </Link>
-                  <Link href="/verify">
-                    <Button variant="outline" className="w-full justify-start">
-                      <span className="mr-2">📱</span>
-                      Scan QR Code
-                    </Button>
-                  </Link>
+
                 </div>
               </CardContent>
             </Card>
