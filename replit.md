@@ -161,5 +161,3 @@ Preferred communication style: Simple, everyday language.
   - **Fixed Order Details Navigation**: Resolved "View Details" button functionality and navigation import issues in home page
   - **Enhanced Order Tracking**: Improved error handling and authentication retry logic for individual order viewing
   - **Fixed Order Success Page Error**: Resolved JavaScript error in payment method display that was causing crashes after successful checkout
-  - **Removed Admin Access Elements**: Cleaned up admin credentials display and admin login buttons from user-facing interfaces
-  - **Updated Sign In Flow**: Changed "Sign in with Google" button to route to /auth page for local authentication
