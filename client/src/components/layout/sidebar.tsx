@@ -233,23 +233,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {/* Actions */}
           <div className="space-y-3">
             {!isAuthenticated ? (
-              <>
-                <Button 
-                  onClick={() => {
-                    window.location.assign('/api/login');
-                  }}
-                  className="w-full bg-electric text-deep-black hover:bg-electric/80"
-                >
-                  Sign In
-                </Button>
-                <Button 
-                  onClick={() => window.location.href = '/admin-login'}
-                  variant="outline"
-                  className="w-full border-gaming-orange text-gaming-orange hover:bg-gaming-orange hover:text-white"
-                >
-                  Admin Login
-                </Button>
-              </>
+              <Button 
+                onClick={() => window.location.href = '/admin-login'}
+                variant="outline"
+                className="w-full border-gaming-orange text-gaming-orange hover:bg-gaming-orange hover:text-white"
+              >
+                Admin Login
+              </Button>
             ) : (
               <Button 
                 onClick={() => window.location.href = '/api/logout'}
