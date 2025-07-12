@@ -762,15 +762,17 @@ export class DatabaseStorage implements IStorage {
     let averageRating = 0;
     let totalReviews = 0;
 
-    result.forEach((row) => {
-      ratingDistribution[row.rating] = row.count;
-      totalReviews = row.total;
-      averageRating = row.avg;
-    });
+    if (result.length > 0) {
+      result.forEach((row) => {
+        ratingDistribution[row.rating] = row.count;
+        totalReviews = row.total || 0;
+        averageRating = row.avg || 0;
+      });
+    }
 
     return {
-      averageRating: Number(averageRating.toFixed(1)),
-      totalReviews,
+      averageRating: averageRating ? Number(Number(averageRating).toFixed(1)) : 0,
+      totalReviews: totalReviews || 0,
       ratingDistribution,
     };
   }

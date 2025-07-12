@@ -116,21 +116,31 @@ function WriteReviewDialog({ productId }: { productId: number }) {
 
   const createReviewMutation = useMutation({
     mutationFn: async (reviewData: any) => {
-      return apiRequest("POST", `/api/products/${productId}/reviews`, reviewData);
+      const response = await apiRequest("POST", `/api/products/${productId}/reviews`, reviewData);
+      return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/products/${productId}/reviews`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/products/${productId}/rating-stats`] });
+    onSuccess: (data) => {
+      console.log("Review created successfully:", data);
+      
+      // Clear form first
+      setRating(5);
+      setTitle("");
+      setComment("");
+      setOpen(false);
+      
+      // Then refresh data with a slight delay to ensure backend processing is complete
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: [`/api/products/${productId}/reviews`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/products/${productId}/rating-stats`] });
+      }, 100);
+      
       toast({
         title: "Review submitted",
         description: "Thank you for your feedback!",
       });
-      setOpen(false);
-      setRating(5);
-      setTitle("");
-      setComment("");
     },
     onError: (error: Error) => {
+      console.error("Review submission error:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to submit review",
@@ -174,8 +184,8 @@ function WriteReviewDialog({ productId }: { productId: number }) {
           Write Review
         </Button>
       </DialogTrigger>
-      <DialogContent className="gaming-card max-w-md">
-        <DialogHeader>
+      <DialogContent className="gaming-card max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="sticky top-0 bg-charcoal z-10 pb-4">
           <DialogTitle className="font-orbitron text-electric">Write a Review</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -187,7 +197,7 @@ function WriteReviewDialog({ productId }: { productId: number }) {
                   key={i}
                   type="button"
                   onClick={() => setRating(i + 1)}
-                  className="focus:outline-none"
+                  className="focus:outline-none hover:scale-110 transition-transform"
                 >
                   <Star
                     className={`h-6 w-6 ${
@@ -217,30 +227,35 @@ function WriteReviewDialog({ productId }: { productId: number }) {
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Share your experience with this product..."
-              className="mt-1"
+              className="mt-1 resize-none"
               rows={4}
               required
             />
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 pt-4 sticky bottom-0 bg-charcoal">
             <Button
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
               className="flex-1"
+              disabled={createReviewMutation.isPending}
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              disabled={createReviewMutation.isPending}
-              className="flex-1 bg-electric text-deep-black hover:bg-electric/80"
+              disabled={createReviewMutation.isPending || !comment.trim()}
+              className="flex-1 bg-electric text-deep-black hover:bg-electric/80 disabled:opacity-50"
             >
               {createReviewMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
-              Submit Review
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit Review"
+              )}
             </Button>
           </div>
         </form>
