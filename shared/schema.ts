@@ -10,6 +10,7 @@ import {
   decimal,
   boolean,
   uuid,
+  unique,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -138,11 +139,40 @@ export const qrCodes = pgTable("qr_codes", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Product reviews and ratings
+export const reviews = pgTable("reviews", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").references(() => products.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  orderId: integer("order_id").references(() => orders.id), // Only verified purchases can review
+  rating: integer("rating").notNull(), // 1-5 stars
+  title: varchar("title", { length: 255 }),
+  comment: text("comment"),
+  isVerifiedPurchase: boolean("is_verified_purchase").default(false),
+  helpfulCount: integer("helpful_count").default(0),
+  isApproved: boolean("is_approved").default(true), // For moderation
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Review helpfulness votes
+export const reviewHelpfulVotes = pgTable("review_helpful_votes", {
+  id: serial("id").primaryKey(),
+  reviewId: integer("review_id").references(() => reviews.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  isHelpful: boolean("is_helpful").notNull(), // true for helpful, false for not helpful
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  uniqueUserReview: unique().on(table.reviewId, table.userId),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   cartItems: many(cartItems),
   orders: many(orders),
   qrCodes: many(qrCodes),
+  reviews: many(reviews),
+  reviewHelpfulVotes: many(reviewHelpfulVotes),
 }));
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
@@ -157,6 +187,7 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   cartItems: many(cartItems),
   orderItems: many(orderItems),
   qrCodes: many(qrCodes),
+  reviews: many(reviews),
 }));
 
 export const cartItemsRelations = relations(cartItems, ({ one }) => ({
@@ -216,6 +247,33 @@ export const inventoryUnitsRelations = relations(inventoryUnits, ({ one }) => ({
   }),
 }));
 
+export const reviewsRelations = relations(reviews, ({ one, many }) => ({
+  product: one(products, {
+    fields: [reviews.productId],
+    references: [products.id],
+  }),
+  user: one(users, {
+    fields: [reviews.userId],
+    references: [users.id],
+  }),
+  order: one(orders, {
+    fields: [reviews.orderId],
+    references: [orders.id],
+  }),
+  helpfulVotes: many(reviewHelpfulVotes),
+}));
+
+export const reviewHelpfulVotesRelations = relations(reviewHelpfulVotes, ({ one }) => ({
+  review: one(reviews, {
+    fields: [reviewHelpfulVotes.reviewId],
+    references: [reviews.id],
+  }),
+  user: one(users, {
+    fields: [reviewHelpfulVotes.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert schemas
 export const insertCategorySchema = createInsertSchema(categories).omit({
   id: true,
@@ -255,6 +313,19 @@ export const insertInventoryUnitSchema = createInsertSchema(inventoryUnits).omit
   updatedAt: true,
 });
 
+export const insertReviewSchema = createInsertSchema(reviews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  helpfulCount: true,
+  isApproved: true,
+});
+
+export const insertReviewHelpfulVoteSchema = createInsertSchema(reviewHelpfulVotes).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -272,3 +343,7 @@ export type QrCode = typeof qrCodes.$inferSelect;
 export type InsertQrCode = z.infer<typeof insertQrCodeSchema>;
 export type InventoryUnit = typeof inventoryUnits.$inferSelect;
 export type InsertInventoryUnit = z.infer<typeof insertInventoryUnitSchema>;
+export type Review = typeof reviews.$inferSelect;
+export type InsertReview = z.infer<typeof insertReviewSchema>;
+export type ReviewHelpfulVote = typeof reviewHelpfulVotes.$inferSelect;
+export type InsertReviewHelpfulVote = z.infer<typeof insertReviewHelpfulVoteSchema>;

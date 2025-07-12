@@ -23,6 +23,11 @@ import {
   type InsertQrCode,
   type InventoryUnit,
   type InsertInventoryUnit,
+  reviews,
+  reviewHelpfulVotes,
+  type Review,
+  type InsertReview,
+  type InsertReviewHelpfulVote,
 } from "@shared/schema";
 // Use local PostgreSQL driver for local development
 const isLocalPostgres = process.env.DATABASE_URL?.includes('localhost') || process.env.DATABASE_URL?.includes('127.0.0.1');
@@ -94,6 +99,18 @@ export interface IStorage {
   updateInventoryUnitStatus(unitId: string, status: string, orderId?: number): Promise<InventoryUnit>;
   generateUnitId(productId: number): Promise<string>;
   getAvailableInventoryCount(productId: number): Promise<number>;
+
+  // Review operations
+  getReviews(productId: number): Promise<(Review & { user: Pick<User, 'id' | 'firstName' | 'lastName' | 'username'> })[]>;
+  createReview(review: InsertReview): Promise<Review>;
+  updateReview(id: number, review: Partial<InsertReview>): Promise<Review>;
+  deleteReview(id: number): Promise<void>;
+  voteReviewHelpful(vote: InsertReviewHelpfulVote): Promise<void>;
+  getProductRatingStats(productId: number): Promise<{
+    averageRating: number;
+    totalReviews: number;
+    ratingDistribution: { [key: number]: number };
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -623,6 +640,139 @@ export class DatabaseStorage implements IStorage {
       );
 
     return countResult?.count || 0;
+  }
+  // Review operations
+  async getReviews(productId: number): Promise<(Review & { user: Pick<User, 'id' | 'firstName' | 'lastName' | 'username'> })[]> {
+    return await db
+      .select({
+        id: reviews.id,
+        productId: reviews.productId,
+        userId: reviews.userId,
+        orderId: reviews.orderId,
+        rating: reviews.rating,
+        title: reviews.title,
+        comment: reviews.comment,
+        isVerifiedPurchase: reviews.isVerifiedPurchase,
+        helpfulCount: reviews.helpfulCount,
+        isApproved: reviews.isApproved,
+        createdAt: reviews.createdAt,
+        updatedAt: reviews.updatedAt,
+        user: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          username: users.username,
+        },
+      })
+      .from(reviews)
+      .innerJoin(users, eq(reviews.userId, users.id))
+      .where(and(eq(reviews.productId, productId), eq(reviews.isApproved, true)))
+      .orderBy(desc(reviews.createdAt));
+  }
+
+  async createReview(reviewData: InsertReview): Promise<Review> {
+    // Check if user has purchased this product
+    const hasOrdered = await db
+      .select({ id: orders.id })
+      .from(orders)
+      .innerJoin(orderItems, eq(orders.id, orderItems.orderId))
+      .where(
+        and(
+          eq(orders.userId, reviewData.userId),
+          eq(orderItems.productId, reviewData.productId),
+          eq(orders.status, 'delivered')
+        )
+      )
+      .limit(1);
+
+    const isVerifiedPurchase = hasOrdered.length > 0;
+    const orderId = hasOrdered.length > 0 ? hasOrdered[0].id : null;
+
+    const [review] = await db
+      .insert(reviews)
+      .values({
+        ...reviewData,
+        orderId,
+        isVerifiedPurchase,
+      })
+      .returning();
+
+    return review;
+  }
+
+  async updateReview(id: number, reviewData: Partial<InsertReview>): Promise<Review> {
+    const [review] = await db
+      .update(reviews)
+      .set({ ...reviewData, updatedAt: new Date() })
+      .where(eq(reviews.id, id))
+      .returning();
+    return review;
+  }
+
+  async deleteReview(id: number): Promise<void> {
+    await db.delete(reviews).where(eq(reviews.id, id));
+  }
+
+  async voteReviewHelpful(vote: InsertReviewHelpfulVote): Promise<void> {
+    await db.transaction(async (tx) => {
+      // Insert or update vote
+      await tx
+        .insert(reviewHelpfulVotes)
+        .values(vote)
+        .onConflictDoUpdate({
+          target: [reviewHelpfulVotes.reviewId, reviewHelpfulVotes.userId],
+          set: { isHelpful: vote.isHelpful },
+        });
+
+      // Update helpful count
+      const [{ count }] = await tx
+        .select({ count: sql<number>`count(*)` })
+        .from(reviewHelpfulVotes)
+        .where(
+          and(
+            eq(reviewHelpfulVotes.reviewId, vote.reviewId),
+            eq(reviewHelpfulVotes.isHelpful, true)
+          )
+        );
+
+      await tx
+        .update(reviews)
+        .set({ helpfulCount: count })
+        .where(eq(reviews.id, vote.reviewId));
+    });
+  }
+
+  async getProductRatingStats(productId: number): Promise<{
+    averageRating: number;
+    totalReviews: number;
+    ratingDistribution: { [key: number]: number };
+  }> {
+    const result = await db
+      .select({
+        rating: reviews.rating,
+        count: sql<number>`count(*)`,
+        avg: sql<number>`avg(${reviews.rating})`,
+        total: sql<number>`count(*) over()`,
+      })
+      .from(reviews)
+      .where(and(eq(reviews.productId, productId), eq(reviews.isApproved, true)))
+      .groupBy(reviews.rating);
+
+    const ratingDistribution: { [key: number]: number } = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    let averageRating = 0;
+    let totalReviews = 0;
+
+    result.forEach((row) => {
+      ratingDistribution[row.rating] = row.count;
+      totalReviews = row.total;
+      averageRating = row.avg;
+    });
+
+    return {
+      averageRating: Number(averageRating.toFixed(1)),
+      totalReviews,
+      ratingDistribution,
+    };
   }
 }
 

@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
 import { useToast } from '@/hooks/use-toast';
+import ReviewSection from '@/components/reviews/ReviewSection';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import { ShoppingCart, Heart, Star, Shield, Truck, RotateCcw } from 'lucide-react';
@@ -326,12 +327,7 @@ export default function ProductDetail() {
             </TabsContent>
             
             <TabsContent value="reviews" className="mt-6">
-              <Card className="gaming-card">
-                <CardContent className="pt-6">
-                  <h3 className="font-orbitron font-bold text-xl mb-4">Customer Reviews</h3>
-                  <p className="text-gray-400">Reviews feature coming soon...</p>
-                </CardContent>
-              </Card>
+              <ReviewSection productId={product.id} />
             </TabsContent>
             
             <TabsContent value="shipping" className="mt-6">

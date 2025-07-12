@@ -769,6 +769,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // File upload is handled by setupFileUpload() middleware
 
+  // Review API routes
+  app.get("/api/products/:productId/reviews", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.productId);
+      const reviews = await storage.getReviews(productId);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
+  app.get("/api/products/:productId/rating-stats", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.productId);
+      const stats = await storage.getProductRatingStats(productId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching rating stats:", error);
+      res.status(500).json({ message: "Failed to fetch rating stats" });
+    }
+  });
+
+  app.post("/api/products/:productId/reviews", isAuthenticated, async (req, res) => {
+    try {
+      const productId = parseInt(req.params.productId);
+      const reviewData = {
+        ...req.body,
+        productId,
+        userId: req.user!.id,
+      };
+
+      const review = await storage.createReview(reviewData);
+      res.status(201).json(review);
+    } catch (error) {
+      console.error("Error creating review:", error);
+      res.status(500).json({ message: "Failed to create review" });
+    }
+  });
+
+  app.put("/api/reviews/:reviewId", isAuthenticated, async (req, res) => {
+    try {
+      const reviewId = parseInt(req.params.reviewId);
+      const review = await storage.updateReview(reviewId, req.body);
+      res.json(review);
+    } catch (error) {
+      console.error("Error updating review:", error);
+      res.status(500).json({ message: "Failed to update review" });
+    }
+  });
+
+  app.delete("/api/reviews/:reviewId", isAuthenticated, async (req, res) => {
+    try {
+      const reviewId = parseInt(req.params.reviewId);
+      await storage.deleteReview(reviewId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting review:", error);
+      res.status(500).json({ message: "Failed to delete review" });
+    }
+  });
+
+  app.post("/api/reviews/:reviewId/helpful", isAuthenticated, async (req, res) => {
+    try {
+      const reviewId = parseInt(req.params.reviewId);
+      const { isHelpful } = req.body;
+      
+      await storage.voteReviewHelpful({
+        reviewId,
+        userId: req.user!.id,
+        isHelpful,
+      });
+      
+      res.status(200).json({ message: "Vote recorded" });
+    } catch (error) {
+      console.error("Error voting on review:", error);
+      res.status(500).json({ message: "Failed to vote on review" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
